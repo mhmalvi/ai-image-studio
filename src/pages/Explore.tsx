@@ -1,10 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Compass, Heart, TrendingUp, Clock, Flame } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ImageModal } from "@/components/ui/image-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useHaptics } from "@/hooks/useHaptics";
+import { headerVariants, containerVariants, itemVariants, gridContainerVariants, gridItemVariants, buttonTapAnimation } from "@/lib/animations";
 import type { User } from "@supabase/supabase-js";
 
 type SortOption = "recent" | "popular" | "trending";
@@ -28,6 +32,7 @@ export default function Explore() {
   const [likedImages, setLikedImages] = useState<Set<string>>(new Set());
   const [selectedImage, setSelectedImage] = useState<ExploreImage | null>(null);
   const { toast } = useToast();
+  const { lightImpact, mediumImpact, successNotification } = useHaptics();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -43,17 +48,7 @@ export default function Explore() {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    fetchImages();
-  }, [sortBy]);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserLikes();
-    }
-  }, [user]);
-
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
@@ -80,7 +75,17 @@ export default function Explore() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sortBy]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserLikes();
+    }
+  }, [user]);
 
   const fetchUserLikes = async () => {
     if (!user) return;
@@ -95,6 +100,11 @@ export default function Explore() {
     }
   };
 
+  const handleRefresh = async () => {
+    await fetchImages();
+    if (user) await fetchUserLikes();
+  };
+
   const handleLike = async (imageId: string) => {
     if (!user) {
       toast({
@@ -105,6 +115,7 @@ export default function Explore() {
       return;
     }
 
+    mediumImpact();
     const isLiked = likedImages.has(imageId);
 
     try {
@@ -150,16 +161,23 @@ export default function Explore() {
   };
 
   const handleDownload = (src: string) => {
+    lightImpact();
     const link = document.createElement("a");
     link.href = src;
     link.download = `ai-image-${Date.now()}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    successNotification();
     toast({
       title: "Downloaded!",
       description: "Image saved to your device",
     });
+  };
+
+  const handleSortChange = (option: SortOption) => {
+    lightImpact();
+    setSortBy(option);
   };
 
   const sortOptions = [
@@ -170,28 +188,35 @@ export default function Explore() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col h-full px-4 pt-4">
+      <PageTransition className="flex flex-col h-full px-4 pt-4">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          variants={headerVariants}
+          initial="initial"
+          animate="animate"
           className="mb-3 flex-shrink-0"
         >
           <h1 className="text-2xl font-bold text-foreground">
             <span className="text-gradient-accent">Explore</span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            Discover amazing AI creations
+            Discover amazing AI creations • Pull to refresh
           </p>
         </motion.div>
 
         {/* Sort Options */}
-        <div className="mb-3 flex gap-2 flex-shrink-0">
+        <motion.div
+          variants={containerVariants}
+          initial="initial"
+          animate="animate"
+          className="mb-3 flex gap-2 flex-shrink-0"
+        >
           {sortOptions.map((option) => (
             <motion.button
               key={option.id}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSortBy(option.id)}
+              variants={itemVariants}
+              whileTap={buttonTapAnimation}
+              onClick={() => handleSortChange(option.id)}
               className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                 sortBy === option.id
                   ? "bg-accent text-accent-foreground"
@@ -202,22 +227,24 @@ export default function Explore() {
               {option.label}
             </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Image Grid */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
+        <PullToRefresh onRefresh={handleRefresh} className="flex-1 scrollbar-hide pb-4">
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
                 key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+                exit="initial"
                 className="grid grid-cols-2 gap-2"
               >
                 {[...Array(6)].map((_, i) => (
-                  <div
+                  <motion.div
                     key={i}
+                    variants={itemVariants}
                     className="aspect-square animate-pulse rounded-xl bg-muted"
                   />
                 ))}
@@ -225,17 +252,16 @@ export default function Explore() {
             ) : images.length > 0 ? (
               <motion.div
                 key="images"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                variants={gridContainerVariants}
+                initial="initial"
+                animate="animate"
+                exit="initial"
                 className="grid grid-cols-2 gap-2"
               >
-                {images.map((image, index) => (
+                {images.map((image) => (
                   <motion.div
                     key={image.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
+                    variants={gridItemVariants}
                     className="group relative cursor-pointer overflow-hidden rounded-xl border border-border/50"
                     onClick={() => setSelectedImage(image)}
                   >
@@ -248,7 +274,7 @@ export default function Explore() {
                     
                     {/* Like button */}
                     <motion.button
-                      whileTap={{ scale: 0.8 }}
+                      whileTap={buttonTapAnimation}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLike(image.id);
@@ -281,24 +307,25 @@ export default function Explore() {
             ) : (
               <motion.div
                 key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+                exit="initial"
                 className="flex flex-1 flex-col items-center justify-center py-20"
               >
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+                <motion.div variants={itemVariants} className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
                   <Compass className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="mb-2 text-base font-semibold text-foreground">
+                </motion.div>
+                <motion.h3 variants={itemVariants} className="mb-2 text-base font-semibold text-foreground">
                   No public images yet
-                </h3>
-                <p className="text-center text-xs text-muted-foreground">
+                </motion.h3>
+                <motion.p variants={itemVariants} className="text-center text-xs text-muted-foreground">
                   Be the first to share your creations!
-                </p>
+                </motion.p>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </PullToRefresh>
 
         {/* Image Preview Modal */}
         <ImageModal
@@ -308,7 +335,7 @@ export default function Explore() {
           prompt={selectedImage?.prompt || undefined}
           onDownload={() => selectedImage && handleDownload(selectedImage.image_url)}
         />
-      </div>
+      </PageTransition>
     </PageLayout>
   );
 }
