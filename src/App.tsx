@@ -12,6 +12,7 @@ import Filter from "./pages/Filter";
 import Gallery from "./pages/Gallery";
 import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
+import Subscription from "./pages/Subscription";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/subscription" element={<Subscription />} />
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/auth/forgot" element={<ForgotPassword />} />
