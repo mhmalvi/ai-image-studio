@@ -1,42 +1,58 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, ImageIcon, ArrowRight } from "lucide-react";
+import { Sparkles, ImageIcon, ArrowRight, Zap, Palette, Share2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { GlassCard } from "@/components/ui/glass-card";
+
+const styles = [
+  { name: "Artistic", gradient: "from-purple-500 to-pink-500" },
+  { name: "Photorealistic", gradient: "from-blue-500 to-cyan-500" },
+  { name: "Anime", gradient: "from-pink-500 to-orange-400" },
+  { name: "Cyberpunk", gradient: "from-cyan-400 to-purple-600" },
+  { name: "Vintage", gradient: "from-amber-500 to-orange-600" },
+  { name: "Fantasy", gradient: "from-emerald-400 to-teal-600" },
+];
+
+const features = [
+  { icon: Zap, label: "Fast Generation", description: "Create in seconds" },
+  { icon: Palette, label: "12+ Filters", description: "Transform photos" },
+  { icon: Share2, label: "Share & Explore", description: "Join community" },
+];
 
 export default function Home() {
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-8">
+      <div className="flex min-h-screen flex-col px-5 pt-10">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
+          className="mb-10 text-center"
         >
           <motion.div
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 backdrop-blur-sm"
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">AI Powered</span>
+            <span className="text-sm font-semibold text-primary">AI Powered</span>
           </motion.div>
 
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">
+          <h1 className="mb-5 text-5xl font-bold tracking-tight leading-tight">
             <span className="text-gradient-primary">AI Image</span>
             <br />
             <span className="text-foreground">Studio</span>
           </h1>
 
-          <p className="mx-auto max-w-xs text-muted-foreground">
+          <p className="mx-auto max-w-sm text-base text-muted-foreground leading-relaxed">
             Create stunning images from text or transform photos with AI-powered filters
           </p>
         </motion.div>
 
         {/* Quick Actions */}
-        <div className="space-y-4">
+        <div className="space-y-4 mb-8">
           {/* Generate Card */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -44,24 +60,33 @@ export default function Home() {
             transition={{ delay: 0.2 }}
           >
             <Link to="/generate" className="block">
-              <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-5 transition-all hover:border-primary/50">
-                <div className="absolute right-0 top-0 h-32 w-32 gradient-primary opacity-10 blur-3xl transition-opacity group-hover:opacity-20" />
-                
-                <div className="relative z-10 flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl gradient-primary">
-                    <Sparkles className="h-7 w-7 text-primary-foreground" />
-                  </div>
+              <GlassCard
+                variant="elevated"
+                glow="primary"
+                className="relative overflow-hidden p-0"
+              >
+                <div className="absolute inset-0 gradient-primary opacity-5" />
+                <div className="relative z-10 flex items-center gap-5 p-6">
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary shadow-lg"
+                  >
+                    <Sparkles className="h-8 w-8 text-primary-foreground" />
+                  </motion.div>
                   <div className="flex-1">
-                    <h3 className="mb-1 text-lg font-semibold text-foreground">
+                    <h3 className="mb-1.5 text-xl font-bold text-foreground">
                       Generate Image
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       Create from text prompts
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <ArrowRight className="h-5 w-5 text-primary" />
+                  </div>
                 </div>
-              </div>
+              </GlassCard>
             </Link>
           </motion.div>
 
@@ -72,56 +97,88 @@ export default function Home() {
             transition={{ delay: 0.3 }}
           >
             <Link to="/filter" className="block">
-              <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-5 transition-all hover:border-accent/50">
-                <div className="absolute right-0 top-0 h-32 w-32 gradient-accent opacity-10 blur-3xl transition-opacity group-hover:opacity-20" />
-                
-                <div className="relative z-10 flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl gradient-accent">
-                    <ImageIcon className="h-7 w-7 text-accent-foreground" />
-                  </div>
+              <GlassCard
+                variant="elevated"
+                glow="accent"
+                className="relative overflow-hidden p-0"
+              >
+                <div className="absolute inset-0 gradient-accent opacity-5" />
+                <div className="relative z-10 flex items-center gap-5 p-6">
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent shadow-lg"
+                  >
+                    <ImageIcon className="h-8 w-8 text-accent-foreground" />
+                  </motion.div>
                   <div className="flex-1">
-                    <h3 className="mb-1 text-lg font-semibold text-foreground">
+                    <h3 className="mb-1.5 text-xl font-bold text-foreground">
                       Apply Filters
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       Transform your photos
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-accent" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+                    <ArrowRight className="h-5 w-5 text-accent" />
+                  </div>
                 </div>
-              </div>
+              </GlassCard>
             </Link>
           </motion.div>
         </div>
+
+        {/* Features Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-8 grid grid-cols-3 gap-3"
+        >
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.label}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 + index * 0.1 }}
+              className="flex flex-col items-center rounded-2xl border border-border/30 bg-card/40 p-4 text-center backdrop-blur-sm"
+            >
+              <feature.icon className="mb-2 h-6 w-6 text-primary" />
+              <span className="text-xs font-semibold text-foreground">{feature.label}</span>
+              <span className="text-[10px] text-muted-foreground">{feature.description}</span>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* Style Examples */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8"
+          transition={{ delay: 0.5 }}
+          className="mb-8"
         >
-          <h2 className="mb-4 text-lg font-semibold text-foreground">
+          <h2 className="mb-4 text-lg font-bold text-foreground">
             Popular Styles
           </h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {["Artistic", "Photorealistic", "Anime", "Cyberpunk", "Vintage"].map(
-              (style, index) => (
-                <motion.div
-                  key={style}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  className="shrink-0"
-                >
-                  <div className="rounded-xl border border-border/50 bg-muted/50 px-4 py-2">
-                    <span className="text-sm font-medium text-foreground">
-                      {style}
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
+            {styles.map((style, index) => (
+              <motion.div
+                key={style.name}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.55 + index * 0.08 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="shrink-0"
+              >
+                <div className={`rounded-2xl bg-gradient-to-r ${style.gradient} p-[1px]`}>
+                  <div className="rounded-2xl bg-card/90 px-5 py-3 backdrop-blur-sm">
+                    <span className="text-sm font-semibold text-foreground">
+                      {style.name}
                     </span>
                   </div>
-                </motion.div>
-              )
-            )}
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
@@ -129,11 +186,11 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-auto pt-8"
+          transition={{ delay: 0.7 }}
+          className="mt-auto pb-6"
         >
           <Link to="/generate">
-            <GradientButton variant="primary" size="lg" className="w-full">
+            <GradientButton variant="primary" size="lg" className="w-full btn-shine">
               <Sparkles className="h-5 w-5" />
               Start Creating
             </GradientButton>
