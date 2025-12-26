@@ -1,18 +1,16 @@
-# Welcome to your Lovable project
+# Pixora - AI Image Generator & Photo Editor
 
-## Project info
+Create stunning AI-generated images and apply creative filters with Pixora. Transform your ideas into beautiful artwork instantly.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- 🎨 AI Image Generation
+- 🖼️ Creative Photo Filters
+- 📱 Cross-platform (iOS, Android, Web)
+- ☁️ Cloud-synced Gallery
+- 🔐 User Authentication
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
 **Use your preferred IDE**
 

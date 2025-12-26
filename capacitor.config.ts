@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.19ff423b80594a7d962f6fb8f8e8b510',
-  appName: 'AI Image Studio',
+  appId: 'com.pixora.app',
+  appName: 'Pixora',
   webDir: 'dist',
   server: {
     url: 'https://19ff423b-8059-4a7d-962f-6fb8f8e8b510.lovableproject.com?forceHideBadge=true',
@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
   },
   ios: {
-    scheme: 'app.lovable.19ff423b80594a7d962f6fb8f8e8b510',
+    scheme: 'com.pixora.app',
   },
 };
 

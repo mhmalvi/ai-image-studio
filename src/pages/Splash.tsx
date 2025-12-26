@@ -130,8 +130,7 @@ export default function Splash() {
               transition={{ delay: 0.5 }}
               className="mb-2 text-3xl font-bold tracking-tight"
             >
-              <span className="text-gradient-primary">AI Image</span>{" "}
-              <span className="text-foreground">Studio</span>
+              <span className="text-gradient-primary">Pixora</span>
             </motion.h1>
 
             <motion.p

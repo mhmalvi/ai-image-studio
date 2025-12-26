@@ -33,7 +33,7 @@ const supportOptions = [
     icon: Mail,
     title: "Email Support",
     description: "Get help within 24 hours",
-    action: "support@aistudio.app",
+    action: "support@pixora.app",
     gradient: "from-primary to-accent"
   },
   {
@@ -58,14 +58,14 @@ export default function Support() {
 
   const handleEmailClick = () => {
     lightImpact();
-    window.location.href = "mailto:support@aistudio.app";
+    window.location.href = "mailto:support@pixora.app";
   };
 
   const handleReportBug = () => {
     lightImpact();
     toast({
       title: "Report a Bug",
-      description: "Email us at bugs@aistudio.app with details about the issue.",
+      description: "Email us at bugs@pixora.app with details about the issue.",
     });
   };
 
@@ -73,7 +73,7 @@ export default function Support() {
     lightImpact();
     toast({
       title: "Feature Request",
-      description: "Email us at feedback@aistudio.app with your suggestion!",
+      description: "Email us at feedback@pixora.app with your suggestion!",
     });
   };
 
