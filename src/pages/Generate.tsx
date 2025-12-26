@@ -8,6 +8,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { ProBadge } from "@/components/ui/pro-badge";
 import { useToast } from "@/hooks/use-toast";
 import { useHaptics } from "@/hooks/useHaptics";
 import { supabase } from "@/integrations/supabase/client";
@@ -334,11 +335,7 @@ export default function Generate() {
                     >
                       <span className="text-base">{style.emoji}</span>
                       <span className="text-[8px] font-medium text-foreground line-clamp-1">{style.label}</span>
-                      {style.isPro && (
-                        <span className="absolute -top-1 -right-1 px-1 py-0.5 text-[6px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">
-                          PRO
-                        </span>
-                      )}
+                      {style.isPro && <ProBadge variant="corner" size="sm" />}
                     </motion.button>
                   ))}
                 </div>
