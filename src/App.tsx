@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Generate from "./pages/Generate";
 import Filter from "./pages/Filter";
 import Gallery from "./pages/Gallery";
+import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/generate" element={<Generate />} />
           <Route path="/filter" element={<Filter />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
