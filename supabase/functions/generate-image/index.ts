@@ -22,26 +22,30 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Enhanced style prompts with detailed artistic direction
     const stylePrompts: Record<string, string> = {
-      artistic: "artistic, painterly style, vibrant colors",
-      photorealistic: "photorealistic, ultra detailed, 8k quality",
-      anime: "anime style, Studio Ghibli inspired, detailed",
-      cyberpunk: "cyberpunk aesthetic, neon lights, futuristic",
-      "oil-painting": "oil painting with rich textures and brushstrokes",
-      vintage: "vintage film photography look with warm tones and grain",
-      watercolor: "delicate watercolor painting with soft edges",
-      "neon-glow": "vibrant neon glow effects and dramatic lighting",
-      sketch: "detailed pencil sketch with fine lines and shading",
-      "pop-art": "pop art style with bold colors like Andy Warhol",
-      "pixel-art": "retro pixel art style with visible pixels",
-      dreamy: "soft dreamy ethereal look with gentle blur and light leaks",
-      noir: "dramatic black and white film noir style with high contrast",
-      fantasy: "magical fantasy style with mystical lighting",
+      artistic: "Create a stunning artistic masterpiece with bold expressive brushstrokes, vibrant harmonious colors, dynamic composition, and museum-quality fine art aesthetics. Emphasize creative interpretation and emotional depth.",
+      photorealistic: "Generate an ultra-photorealistic image with perfect natural lighting, razor-sharp details, professional DSLR quality, 8K resolution, realistic textures, accurate shadows, and lifelike depth of field.",
+      anime: "Create in beautiful Japanese anime style with expressive large eyes, dynamic poses, vibrant saturated colors, clean precise linework, cel-shading, and modern anime aesthetics inspired by Studio Ghibli and Makoto Shinkai.",
+      cyberpunk: "Design in immersive cyberpunk aesthetic with neon-lit rain-slicked streets, holographic displays, futuristic technology, dark moody atmosphere with vibrant cyan and magenta neon accents, blade runner inspired.",
+      "oil-painting": "Create a classical oil painting masterpiece with rich impasto textures, masterful visible brushwork, dramatic chiaroscuro lighting, deep color saturation, and museum-quality Renaissance-inspired finish.",
+      vintage: "Apply authentic vintage film photography aesthetic with warm sepia and amber tones, organic film grain, gentle vignette, faded nostalgic colors, and dreamy 1970s Kodachrome feel.",
+      watercolor: "Paint in delicate traditional watercolor style with soft organic color bleeds, translucent layered washes, visible paper texture, artistic color diffusion, and impressionistic brushwork.",
+      "neon-glow": "Create with vibrant neon glow effects, electric luminous colors, synthwave retro-futuristic aesthetics, dramatic rim lighting, and glowing atmospheric haze.",
+      sketch: "Render as a detailed professional pencil sketch with fine crosshatching, artistic graphite shading, hand-drawn linework quality, visible texture, and illustrator-quality craftsmanship.",
+      "pop-art": "Design in bold pop art style inspired by Warhol and Lichtenstein with bright primary colors, Ben-Day halftone dots, graphic high-contrast composition, and iconic comic-book aesthetics.",
+      noir: "Create in dramatic film noir style with high-contrast black and white, deep mysterious shadows, moody atmospheric lighting, cinematic composition, and classic 1940s detective movie feel.",
+      fantasy: "Generate in epic fantasy art style with magical ethereal lighting, mystical atmosphere, enchanted elements, rich detailed environments, and concept art quality inspired by fantasy illustrations.",
     };
 
-    const fullPrompt = `${prompt}, ${stylePrompts[style] || stylePrompts.artistic}`;
+    const styleDescription = stylePrompts[style] || stylePrompts.artistic;
+    const fullPrompt = `${styleDescription}
 
-    console.log("Generating image with prompt:", fullPrompt);
+Subject: ${prompt}
+
+Technical requirements: Ultra high resolution, professional quality, perfect composition, stunning visual impact. Create a masterpiece.`;
+
+    console.log("Generating image with style:", style, "prompt length:", fullPrompt.length);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -57,15 +61,16 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error("AI gateway error:", response.status, await response.text());
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Credits exhausted. Please try again later." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       throw new Error("AI gateway error");
@@ -75,6 +80,7 @@ serve(async (req) => {
     const base64Image = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!base64Image) {
+      console.error("No image in response:", JSON.stringify(data).substring(0, 300));
       throw new Error("No image returned from AI");
     }
 
@@ -95,12 +101,11 @@ serve(async (req) => {
       throw new Error("Failed to save image");
     }
 
-    // Get public URL
     const { data: urlData } = supabase.storage
       .from("ai-images")
       .getPublicUrl(fileName);
 
-    console.log("Image uploaded successfully:", urlData.publicUrl);
+    console.log("Image generated and uploaded successfully:", urlData.publicUrl);
 
     return new Response(JSON.stringify({ imageUrl: urlData.publicUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -15,6 +15,13 @@ const config: CapacitorConfig = {
       showSpinner: false,
     },
   },
+  // Deep link configuration for OAuth callbacks
+  android: {
+    allowMixedContent: true,
+  },
+  ios: {
+    scheme: 'app.lovable.19ff423b80594a7d962f6fb8f8e8b510',
+  },
 };
 
 export default config;

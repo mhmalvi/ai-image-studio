@@ -22,33 +22,46 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const filterPrompts: Record<string, string> = {
-      "oil-painting": "Transform into an oil painting with rich textures and brushstrokes",
-      "cyberpunk": "Apply cyberpunk aesthetic with neon colors and futuristic elements",
-      "vintage": "Apply vintage film photography look with warm tones and grain",
-      "anime": "Transform into anime/manga art style",
-      "watercolor": "Transform into a delicate watercolor painting",
-      "neon-glow": "Add vibrant neon glow effects and lighting",
-      "sketch": "Transform into a detailed pencil sketch with fine lines and shading",
-      "pop-art": "Apply pop art style with bold colors and halftone patterns like Andy Warhol",
-      "pixel-art": "Transform into retro pixel art style with visible pixels",
-      "dreamy": "Apply a soft, dreamy ethereal look with gentle blur and light leaks",
-      "noir": "Transform into dramatic black and white film noir style with high contrast",
-      "fantasy": "Apply magical fantasy style with mystical lighting and enchanted atmosphere",
+    // Calculate intensity description for more nuanced control
+    const getIntensityDescription = (level: number): string => {
+      if (level <= 25) return "very subtle and gentle, barely noticeable";
+      if (level <= 50) return "moderate and balanced, clearly visible but natural";
+      if (level <= 75) return "strong and pronounced, dramatically visible";
+      return "maximum intensity, fully transformed with bold effect";
     };
 
-    // Adjust prompt based on intensity
-    let intensityPrefix = "";
-    if (intensity < 40) {
-      intensityPrefix = "Subtly and gently ";
-    } else if (intensity > 80) {
-      intensityPrefix = "Strongly and dramatically ";
-    }
+    const intensityDesc = getIntensityDescription(intensity);
 
-    const basePrompt = filterPrompts[filter] || filterPrompts["oil-painting"];
-    const fullPrompt = `${intensityPrefix}${basePrompt}. Apply with ${intensity}% effect strength.`;
+    // Enhanced intelligent filter prompts with detailed artistic direction
+    const filterPrompts: Record<string, string> = {
+      "oil-painting": `Transform this image into a ${intensityDesc} classical oil painting. Apply rich impasto textures with visible dimensional brushstrokes, masterful color blending, dramatic chiaroscuro lighting, and museum-quality Renaissance painting aesthetics. Maintain the original subject while adding painterly artistic interpretation.`,
+      
+      "cyberpunk": `Apply a ${intensityDesc} cyberpunk transformation. Add neon lighting effects in cyan and magenta, futuristic holographic overlays, rain-slicked reflective surfaces, dystopian atmosphere, and blade-runner inspired color grading while preserving the subject's identity.`,
+      
+      "vintage": `Apply ${intensityDesc} authentic vintage film photography processing. Add warm sepia and amber color tones, organic film grain texture, gentle corner vignette, faded nostalgic color palette, and dreamy 1970s Kodachrome aesthetic while maintaining subject clarity.`,
+      
+      "anime": `Transform into ${intensityDesc} Japanese anime/manga art style. Add clean precise linework, cel-shading with distinct shadows, vibrant saturated anime colors, expressive stylized features, and modern anime aesthetics while keeping the subject recognizable.`,
+      
+      "watercolor": `Apply ${intensityDesc} traditional watercolor painting effect. Add soft organic color bleeds, translucent layered washes, visible textured paper grain, artistic color diffusion, and impressionistic brushwork while maintaining subject composition.`,
+      
+      "neon-glow": `Add ${intensityDesc} vibrant neon glow effects. Apply electric luminous rim lighting, synthwave color palette, glowing atmospheric haze, retro-futuristic aesthetics, and dramatic neon accents while preserving subject details.`,
+      
+      "sketch": `Transform into a ${intensityDesc} professional pencil sketch. Add detailed crosshatching, artistic graphite shading, hand-drawn linework quality, visible paper texture, and illustrator-quality craftsmanship while maintaining subject likeness.`,
+      
+      "pop-art": `Apply ${intensityDesc} bold pop art style transformation. Add bright primary colors, Ben-Day halftone dot patterns, high-contrast graphic composition, Warhol-inspired color blocking, and comic-book aesthetics while keeping subject recognizable.`,
+      
+      "portrait-enhance": `Apply ${intensityDesc} professional portrait enhancement. Intelligently smooth skin while keeping natural texture, enhance eye clarity and brightness, optimize facial lighting, add subtle glamour glow, and create magazine-quality portrait results.`,
+      
+      "hdr": `Apply ${intensityDesc} HDR enhancement processing. Dramatically boost dynamic range, reveal hidden details in shadows and highlights, intensify color vibrancy, add dramatic contrast, and create stunning high-impact visual results.`,
+      
+      "cinematic": `Apply ${intensityDesc} cinematic color grading. Add Hollywood film-like color processing, anamorphic lens feel, dramatic atmospheric lighting, movie poster quality composition, and professional cinema aesthetics.`,
+      
+      "fantasy": `Transform with ${intensityDesc} magical fantasy effects. Add ethereal glowing lighting, mystical particle effects, enchanted color atmosphere, fairytale magical elements, and epic fantasy illustration quality while maintaining subject.`,
+    };
 
-    console.log("Applying filter:", filter, "with intensity:", intensity);
+    const filterPrompt = filterPrompts[filter] || filterPrompts["oil-painting"];
+
+    console.log("Applying filter:", filter, "intensity:", intensity, "prompt length:", filterPrompt.length);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -61,7 +74,7 @@ serve(async (req) => {
         messages: [{
           role: "user",
           content: [
-            { type: "text", text: fullPrompt },
+            { type: "text", text: filterPrompt },
             { type: "image_url", image_url: { url: imageUrl } },
           ],
         }],
@@ -70,15 +83,16 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      console.error("AI gateway error:", response.status, await response.text());
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Credits exhausted. Please try again later." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       throw new Error("AI gateway error");
@@ -88,6 +102,7 @@ serve(async (req) => {
     const base64Image = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!base64Image) {
+      console.error("No image in response");
       throw new Error("No image returned from AI");
     }
 
@@ -108,7 +123,6 @@ serve(async (req) => {
       throw new Error("Failed to save image");
     }
 
-    // Get public URL
     const { data: urlData } = supabase.storage
       .from("ai-images")
       .getPublicUrl(fileName);
