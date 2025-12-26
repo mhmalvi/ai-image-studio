@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FolderOpen, Globe, Lock } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ImageCard } from "@/components/ui/image-card";
 import { ImageModal } from "@/components/ui/image-modal";
 import { useToast } from "@/hooks/use-toast";
+import { useHaptics } from "@/hooks/useHaptics";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { headerVariants, containerVariants, itemVariants, gridContainerVariants, gridItemVariants } from "@/lib/animations";
 
 interface GalleryImage {
   id: string;
@@ -35,18 +39,9 @@ export default function Gallery() {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { lightImpact, successNotification } = useHaptics();
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (isAuthenticated && user) {
-        fetchImages();
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [user, isAuthenticated, authLoading]);
-
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
@@ -64,9 +59,24 @@ export default function Gallery() {
     } finally {
       setIsLoading(false);
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (isAuthenticated && user) {
+        fetchImages();
+      } else {
+        setIsLoading(false);
+      }
+    }
+  }, [user, isAuthenticated, authLoading, fetchImages]);
+
+  const handleRefresh = async () => {
+    await fetchImages();
   };
 
   const handleDownload = (src: string) => {
+    lightImpact();
     const link = document.createElement("a");
     link.href = src;
     link.download = `ai-image-${Date.now()}.png`;
@@ -74,6 +84,7 @@ export default function Gallery() {
     link.click();
     document.body.removeChild(link);
 
+    successNotification();
     toast({
       title: "Downloaded!",
       description: "Image saved to your device",
@@ -81,6 +92,7 @@ export default function Gallery() {
   };
 
   const handleShare = async (src: string, prompt: string) => {
+    lightImpact();
     if (navigator.share) {
       try {
         await navigator.share({
@@ -101,6 +113,7 @@ export default function Gallery() {
   };
 
   const handleDelete = async (id: string) => {
+    lightImpact();
     try {
       const { error } = await supabase
         .from("generated_images")
@@ -124,6 +137,7 @@ export default function Gallery() {
   };
 
   const togglePublic = async (id: string, currentPublic: boolean) => {
+    lightImpact();
     try {
       const { error } = await supabase
         .from("generated_images")
@@ -154,10 +168,11 @@ export default function Gallery() {
   if (authLoading || isLoading) {
     return (
       <PageLayout>
-        <div className="flex flex-col h-full px-4 pt-4">
+        <PageTransition className="flex flex-col h-full px-4 pt-4">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            variants={headerVariants}
+            initial="initial"
+            animate="animate"
             className="mb-4"
           >
             <h1 className="text-2xl font-bold text-foreground">
@@ -173,7 +188,7 @@ export default function Gallery() {
               />
             ))}
           </div>
-        </div>
+        </PageTransition>
       </PageLayout>
     );
   }
@@ -181,10 +196,11 @@ export default function Gallery() {
   if (!isAuthenticated) {
     return (
       <PageLayout>
-        <div className="flex flex-col h-full px-4 pt-4">
+        <PageTransition className="flex flex-col h-full px-4 pt-4">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            variants={headerVariants}
+            initial="initial"
+            animate="animate"
             className="mb-4"
           >
             <h1 className="text-2xl font-bold text-foreground">
@@ -192,51 +208,56 @@ export default function Gallery() {
             </h1>
           </motion.div>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
             className="flex flex-1 flex-col items-center justify-center"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+            <motion.div variants={itemVariants} className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
               <FolderOpen className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="mb-2 text-base font-semibold text-foreground">
+            </motion.div>
+            <motion.h3 variants={itemVariants} className="mb-2 text-base font-semibold text-foreground">
               Sign in to view your gallery
-            </h3>
-            <p className="text-center text-xs text-muted-foreground">
+            </motion.h3>
+            <motion.p variants={itemVariants} className="text-center text-xs text-muted-foreground">
               Create an account to save and sync your creations
-            </p>
+            </motion.p>
           </motion.div>
-        </div>
+        </PageTransition>
       </PageLayout>
     );
   }
 
   return (
     <PageLayout>
-      <div className="flex flex-col h-full px-4 pt-4">
+      <PageTransition className="flex flex-col h-full px-4 pt-4">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          variants={headerVariants}
+          initial="initial"
+          animate="animate"
           className="mb-4 flex-shrink-0"
         >
           <h1 className="text-2xl font-bold text-foreground">
             My <span className="text-gradient-primary">Gallery</span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            Your AI creations ({images.length} images)
+            Your AI creations ({images.length} images) • Pull to refresh
           </p>
         </motion.div>
 
         {images.length > 0 ? (
-          <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
-            <div className="grid grid-cols-2 gap-2">
-              {images.map((image, index) => (
+          <PullToRefresh onRefresh={handleRefresh} className="flex-1 scrollbar-hide pb-4">
+            <motion.div
+              variants={gridContainerVariants}
+              initial="initial"
+              animate="animate"
+              className="grid grid-cols-2 gap-2"
+            >
+              {images.map((image) => (
                 <motion.div
                   key={image.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
+                  variants={gridItemVariants}
                   className="relative cursor-pointer"
                   onClick={() => setSelectedImage(image)}
                 >
@@ -264,23 +285,24 @@ export default function Gallery() {
                   </button>
                 </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </PullToRefresh>
         ) : (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
             className="flex flex-1 flex-col items-center justify-center"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+            <motion.div variants={itemVariants} className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
               <FolderOpen className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="mb-2 text-base font-semibold text-foreground">
+            </motion.div>
+            <motion.h3 variants={itemVariants} className="mb-2 text-base font-semibold text-foreground">
               No images yet
-            </h3>
-            <p className="text-center text-xs text-muted-foreground">
+            </motion.h3>
+            <motion.p variants={itemVariants} className="text-center text-xs text-muted-foreground">
               Start creating to build your gallery
-            </p>
+            </motion.p>
           </motion.div>
         )}
 
@@ -293,7 +315,7 @@ export default function Gallery() {
           onDownload={() => selectedImage && handleDownload(selectedImage.image_url)}
           onShare={() => selectedImage && handleShare(selectedImage.image_url, selectedImage.prompt || "")}
         />
-      </div>
+      </PageTransition>
     </PageLayout>
   );
 }
