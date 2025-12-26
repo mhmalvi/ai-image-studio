@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, filter } = await req.json();
+    const { imageUrl, filter, intensity = 70 } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) throw new Error("API key not configured");
@@ -23,7 +23,24 @@ serve(async (req) => {
       "anime": "Transform into anime/manga art style",
       "watercolor": "Transform into a delicate watercolor painting",
       "neon-glow": "Add vibrant neon glow effects and lighting",
+      "sketch": "Transform into a detailed pencil sketch with fine lines and shading",
+      "pop-art": "Apply pop art style with bold colors and halftone patterns like Andy Warhol",
+      "pixel-art": "Transform into retro pixel art style with visible pixels",
+      "dreamy": "Apply a soft, dreamy ethereal look with gentle blur and light leaks",
+      "noir": "Transform into dramatic black and white film noir style with high contrast",
+      "fantasy": "Apply magical fantasy style with mystical lighting and enchanted atmosphere",
     };
+
+    // Adjust prompt based on intensity
+    let intensityPrefix = "";
+    if (intensity < 40) {
+      intensityPrefix = "Subtly and gently ";
+    } else if (intensity > 80) {
+      intensityPrefix = "Strongly and dramatically ";
+    }
+
+    const basePrompt = filterPrompts[filter] || filterPrompts["oil-painting"];
+    const fullPrompt = `${intensityPrefix}${basePrompt}. Apply with ${intensity}% effect strength.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -36,7 +53,7 @@ serve(async (req) => {
         messages: [{
           role: "user",
           content: [
-            { type: "text", text: filterPrompts[filter] || filterPrompts["oil-painting"] },
+            { type: "text", text: fullPrompt },
             { type: "image_url", image_url: { url: imageUrl } },
           ],
         }],

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Wand2, Download, Share2, RotateCcw } from "lucide-react";
+import { Sparkles, Wand2, Download, Share2, RotateCcw, Globe, Lock } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const stylePresets = [
   { id: "artistic", label: "Artistic", color: "primary" },
@@ -20,7 +22,9 @@ export default function Generate() {
   const [selectedStyle, setSelectedStyle] = useState("artistic");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -44,9 +48,15 @@ export default function Generate() {
 
       if (data?.imageUrl) {
         setGeneratedImage(data.imageUrl);
+        
+        // Save to database if authenticated
+        if (isAuthenticated && user) {
+          await saveToDatabase(data.imageUrl);
+        }
+
         toast({
           title: "Image created!",
-          description: "Your AI masterpiece is ready",
+          description: isAuthenticated ? "Saved to your gallery" : "Sign in to save your creations",
         });
       }
     } catch (error: any) {
@@ -59,6 +69,19 @@ export default function Generate() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const saveToDatabase = async (imageUrl: string) => {
+    if (!user) return;
+
+    await supabase.from("generated_images").insert({
+      user_id: user.id,
+      image_url: imageUrl,
+      prompt: prompt,
+      style: selectedStyle,
+      type: "generated",
+      is_public: isPublic,
+    });
   };
 
   const handleDownload = () => {
@@ -102,6 +125,7 @@ export default function Generate() {
   const handleReset = () => {
     setGeneratedImage(null);
     setPrompt("");
+    setIsPublic(false);
   };
 
   return (
@@ -141,7 +165,7 @@ export default function Generate() {
               </div>
 
               {/* Style Presets */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <p className="mb-3 text-sm font-medium text-foreground">
                   Choose a style
                 </p>
@@ -162,6 +186,23 @@ export default function Generate() {
                   ))}
                 </div>
               </div>
+
+              {/* Public Toggle */}
+              {isAuthenticated && (
+                <div className="mb-6 flex items-center justify-between rounded-xl border border-border/50 bg-card p-3">
+                  <div className="flex items-center gap-2">
+                    {isPublic ? (
+                      <Globe className="h-4 w-4 text-accent" />
+                    ) : (
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="text-sm font-medium text-foreground">
+                      Share to Explore
+                    </span>
+                  </div>
+                  <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+                </div>
+              )}
 
               {/* Generate Button */}
               <div className="mt-auto">

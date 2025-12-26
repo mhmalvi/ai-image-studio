@@ -1,11 +1,14 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw } from "lucide-react";
+import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const filterPresets = [
   { id: "oil-painting", label: "Oil Painting", emoji: "🎨" },
@@ -14,15 +17,24 @@ const filterPresets = [
   { id: "anime", label: "Anime", emoji: "✨" },
   { id: "watercolor", label: "Watercolor", emoji: "💧" },
   { id: "neon-glow", label: "Neon Glow", emoji: "💜" },
+  { id: "sketch", label: "Pencil Sketch", emoji: "✏️" },
+  { id: "pop-art", label: "Pop Art", emoji: "🎭" },
+  { id: "pixel-art", label: "Pixel Art", emoji: "👾" },
+  { id: "dreamy", label: "Dreamy", emoji: "☁️" },
+  { id: "noir", label: "Film Noir", emoji: "🎬" },
+  { id: "fantasy", label: "Fantasy", emoji: "🧙" },
 ];
 
 export default function Filter() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [intensity, setIntensity] = useState([70]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [filteredImage, setFilteredImage] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,7 +74,8 @@ export default function Filter() {
       const { data, error } = await supabase.functions.invoke("apply-filter", {
         body: { 
           imageUrl: selectedImage, 
-          filter: selectedFilter 
+          filter: selectedFilter,
+          intensity: intensity[0],
         },
       });
 
@@ -70,9 +83,15 @@ export default function Filter() {
 
       if (data?.imageUrl) {
         setFilteredImage(data.imageUrl);
+        
+        // Save to database if authenticated
+        if (isAuthenticated && user) {
+          await saveToDatabase(data.imageUrl);
+        }
+
         toast({
           title: "Filter applied!",
-          description: "Your image has been transformed",
+          description: isAuthenticated ? "Saved to your gallery" : "Sign in to save your creations",
         });
       }
     } catch (error: any) {
@@ -85,6 +104,21 @@ export default function Filter() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const saveToDatabase = async (imageUrl: string) => {
+    if (!user) return;
+
+    const filterLabel = filterPresets.find((f) => f.id === selectedFilter)?.label || selectedFilter;
+
+    await supabase.from("generated_images").insert({
+      user_id: user.id,
+      image_url: imageUrl,
+      prompt: `${filterLabel} filter at ${intensity[0]}% intensity`,
+      style: selectedFilter,
+      type: "filtered",
+      is_public: isPublic,
+    });
   };
 
   const handleDownload = () => {
@@ -107,6 +141,8 @@ export default function Filter() {
     setSelectedImage(null);
     setSelectedFilter(null);
     setFilteredImage(null);
+    setIntensity([70]);
+    setIsPublic(false);
   };
 
   return (
@@ -209,26 +245,63 @@ export default function Filter() {
                 <p className="mb-3 text-sm font-medium text-foreground">
                   Choose a filter
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {filterPresets.map((filter) => (
                     <motion.button
                       key={filter.id}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedFilter(filter.id)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition-all ${
+                      className={`flex flex-col items-center gap-1 rounded-xl border-2 p-2 transition-all ${
                         selectedFilter === filter.id
                           ? "border-accent bg-accent/10"
                           : "border-border/50 bg-card hover:border-accent/30"
                       }`}
                     >
-                      <span className="text-xl">{filter.emoji}</span>
-                      <span className="text-xs font-medium text-foreground">
+                      <span className="text-lg">{filter.emoji}</span>
+                      <span className="text-[10px] font-medium text-foreground line-clamp-1">
                         {filter.label}
                       </span>
                     </motion.button>
                   ))}
                 </div>
               </div>
+
+              {/* Intensity Slider */}
+              <div className="mb-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">
+                    Intensity
+                  </p>
+                  <span className="text-sm text-muted-foreground">
+                    {intensity[0]}%
+                  </span>
+                </div>
+                <Slider
+                  value={intensity}
+                  onValueChange={setIntensity}
+                  max={100}
+                  min={10}
+                  step={10}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Public Toggle */}
+              {isAuthenticated && (
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-border/50 bg-card p-3">
+                  <div className="flex items-center gap-2">
+                    {isPublic ? (
+                      <Globe className="h-4 w-4 text-accent" />
+                    ) : (
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="text-sm font-medium text-foreground">
+                      Share to Explore
+                    </span>
+                  </div>
+                  <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="mt-auto grid grid-cols-2 gap-3">

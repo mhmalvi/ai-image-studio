@@ -1,21 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, LogIn, LogOut, Settings, Crown, ChevronRight } from "lucide-react";
+import { User, LogIn, LogOut, Settings, Crown, ChevronRight, ImageIcon, Wand2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Profile() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isLoading: authLoading, signUp, signIn, signOut, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [stats, setStats] = useState({ generated: 0, filtered: 0, total: 0 });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      fetchStats();
+    }
+  }, [user]);
+
+  const fetchStats = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("generated_images")
+      .select("type")
+      .eq("user_id", user.id);
+
+    if (!error && data) {
+      const generated = data.filter((i) => i.type === "generated").length;
+      const filtered = data.filter((i) => i.type === "filtered").length;
+      setStats({ generated, filtered, total: data.length });
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,33 +46,31 @@ export default function Profile() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
+        const { error } = await signUp(email, password);
         if (error) throw error;
         toast({
           title: "Account created!",
           description: "Welcome to AI Image Studio",
         });
-        setIsLoggedIn(true);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await signIn(email, password);
         if (error) throw error;
         toast({
           title: "Welcome back!",
           description: "You're now signed in",
         });
-        setIsLoggedIn(true);
       }
       setShowAuth(false);
+      setEmail("");
+      setPassword("");
     } catch (error: any) {
+      let message = error.message;
+      if (error.message?.includes("User already registered")) {
+        message = "This email is already registered. Try signing in instead.";
+      }
       toast({
         title: "Error",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -58,8 +79,8 @@ export default function Profile() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false);
+    await signOut();
+    setStats({ generated: 0, filtered: 0, total: 0 });
     toast({
       title: "Signed out",
       description: "See you next time!",
@@ -70,6 +91,16 @@ export default function Profile() {
     { icon: Crown, label: "Upgrade to Pro", color: "text-highlight" },
     { icon: Settings, label: "Settings", color: "text-muted-foreground" },
   ];
+
+  if (authLoading) {
+    return (
+      <PageLayout>
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -82,7 +113,7 @@ export default function Profile() {
         >
           <h1 className="text-2xl font-bold text-foreground">Profile</h1>
           <p className="text-sm text-muted-foreground">
-            {isLoggedIn ? "Manage your account" : "Sign in to sync your creations"}
+            {isAuthenticated ? "Manage your account" : "Sign in to sync your creations"}
           </p>
         </motion.div>
 
@@ -99,13 +130,13 @@ export default function Profile() {
                   <User className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div className="flex-1">
-                  {isLoggedIn ? (
+                  {isAuthenticated ? (
                     <>
                       <h3 className="text-lg font-semibold text-foreground">
                         Welcome!
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {email || "user@email.com"}
+                        {user?.email}
                       </p>
                     </>
                   ) : (
@@ -125,9 +156,9 @@ export default function Profile() {
             {/* Stats */}
             <div className="mb-6 grid grid-cols-3 gap-3">
               {[
-                { label: "Created", value: "12" },
-                { label: "Filtered", value: "8" },
-                { label: "Saved", value: "20" },
+                { label: "Generated", value: stats.generated, icon: Wand2 },
+                { label: "Filtered", value: stats.filtered, icon: ImageIcon },
+                { label: "Total", value: stats.total, icon: ImageIcon },
               ].map((stat) => (
                 <div
                   key={stat.label}
@@ -160,7 +191,7 @@ export default function Profile() {
 
             {/* Auth Button */}
             <div className="mt-auto">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <GradientButton
                   onClick={handleLogout}
                   variant="secondary"

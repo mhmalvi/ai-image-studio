@@ -1,12 +1,12 @@
-import { Home, Sparkles, ImageIcon, FolderOpen, User } from "lucide-react";
+import { Home, Sparkles, ImageIcon, FolderOpen, User, Compass } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
-  { to: "/generate", icon: Sparkles, label: "Generate" },
-  { to: "/filter", icon: ImageIcon, label: "Filters" },
+  { to: "/generate", icon: Sparkles, label: "Create" },
+  { to: "/explore", icon: Compass, label: "Explore" },
   { to: "/gallery", icon: FolderOpen, label: "Gallery" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
