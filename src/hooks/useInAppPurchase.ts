@@ -37,7 +37,7 @@ export interface InAppPurchaseState {
   error: string | null;
 }
 
-const REVENUECAT_API_KEY = ""; // Set via Supabase secrets in production
+const REVENUECAT_API_KEY = "sk_pKPxkUAcHnDbRjjlJUzxNPbJYOTBd";
 
 export function useInAppPurchase() {
   const { user } = useAuth();
