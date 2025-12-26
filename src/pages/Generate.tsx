@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Wand2, Download, Share2, RotateCcw, Globe, Lock, RefreshCw } from "lucide-react";
+import { Sparkles, Wand2, Download, Share2, RotateCcw, Globe, Lock, RefreshCw, Pencil } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ImageEditor } from "@/components/editor/ImageEditor";
 
 const stylePresets = [
   { id: "artistic", label: "Artistic", emoji: "🎨" },
@@ -36,6 +37,7 @@ export default function Generate() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
@@ -188,11 +190,18 @@ export default function Generate() {
     setPrompt("");
     setIsPublic(false);
     setError(null);
+    setIsEditing(false);
   };
 
   const handleRetry = () => {
     setError(null);
     handleGenerate();
+  };
+
+  const handleEditSave = (editedImageUrl: string) => {
+    setGeneratedImage(editedImageUrl);
+    setIsEditing(false);
+    toast({ title: "Edits applied!", description: "Your image has been updated" });
   };
 
   return (
@@ -357,7 +366,15 @@ export default function Generate() {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-auto grid grid-cols-3 gap-3">
+              <div className="mt-auto grid grid-cols-4 gap-2">
+                <GradientButton
+                  onClick={() => setIsEditing(true)}
+                  variant="accent"
+                  size="md"
+                  className="w-full"
+                >
+                  <Pencil className="h-4 w-4" />
+                </GradientButton>
                 <GradientButton
                   onClick={handleDownload}
                   variant="primary"
@@ -376,7 +393,7 @@ export default function Generate() {
                 </GradientButton>
                 <GradientButton
                   onClick={handleReset}
-                  variant="accent"
+                  variant="secondary"
                   size="md"
                   className="w-full"
                 >
@@ -387,6 +404,17 @@ export default function Generate() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Image Editor Modal */}
+      <AnimatePresence>
+        {isEditing && generatedImage && (
+          <ImageEditor
+            imageUrl={generatedImage}
+            onSave={handleEditSave}
+            onCancel={() => setIsEditing(false)}
+          />
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }

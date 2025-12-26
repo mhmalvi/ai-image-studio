@@ -1,1 +1,4 @@
 project_id = "snuradrylhunyrkemynp"
+
+[functions.enhance-image]
+verify_jwt = false

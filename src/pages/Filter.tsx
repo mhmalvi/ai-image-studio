@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw } from "lucide-react";
+import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw, Pencil } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ImageEditor } from "@/components/editor/ImageEditor";
 
 const filterPresets = [
   { id: "oil-painting", label: "Oil Painting", emoji: "🎨" },
@@ -33,6 +34,7 @@ export default function Filter() {
   const [filteredImage, setFilteredImage] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -186,11 +188,18 @@ export default function Filter() {
     setIntensity([70]);
     setIsPublic(false);
     setError(null);
+    setIsEditing(false);
   };
 
   const handleRetry = () => {
     setError(null);
     handleApplyFilter();
+  };
+
+  const handleEditSave = (editedImageUrl: string) => {
+    setFilteredImage(editedImageUrl);
+    setIsEditing(false);
+    toast({ title: "Edits applied!", description: "Your image has been updated" });
   };
 
   return (
@@ -417,15 +426,14 @@ export default function Filter() {
                     </GradientButton>
                   </>
                 ) : (
-                  <>
+                  <div className="col-span-2 grid grid-cols-3 gap-2">
                     <GradientButton
-                      onClick={handleReset}
-                      variant="secondary"
+                      onClick={() => setIsEditing(true)}
+                      variant="accent"
                       size="md"
                       className="w-full"
                     >
-                      <RotateCcw className="h-4 w-4" />
-                      New
+                      <Pencil className="h-4 w-4" />
                     </GradientButton>
                     <GradientButton
                       onClick={handleDownload}
@@ -434,9 +442,16 @@ export default function Filter() {
                       className="w-full"
                     >
                       <Download className="h-4 w-4" />
-                      Save
                     </GradientButton>
-                  </>
+                    <GradientButton
+                      onClick={handleReset}
+                      variant="secondary"
+                      size="md"
+                      className="w-full"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </GradientButton>
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -455,6 +470,17 @@ export default function Filter() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Image Editor Modal */}
+      <AnimatePresence>
+        {isEditing && filteredImage && (
+          <ImageEditor
+            imageUrl={filteredImage}
+            onSave={handleEditSave}
+            onCancel={() => setIsEditing(false)}
+          />
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }
