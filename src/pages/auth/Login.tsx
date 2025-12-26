@@ -6,6 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { PremiumInput } from "@/components/ui/premium-input";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
@@ -63,6 +64,8 @@ export default function Login() {
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue creating">
       <form onSubmit={handleSubmit} className="space-y-6">
+        <SocialLoginButtons />
+        
         <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
           <PremiumInput
             type="email"

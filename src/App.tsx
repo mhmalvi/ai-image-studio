@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
 import Generate from "./pages/Generate";
@@ -39,26 +40,28 @@ function SplashRedirect() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/splash" element={<Splash />} />
-          <Route path="/" element={<SplashRedirect />} />
-          <Route path="/generate" element={<Generate />} />
-          <Route path="/filter" element={<Filter />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/signup" element={<Signup />} />
-          <Route path="/auth/forgot" element={<ForgotPassword />} />
-          <Route path="/auth/reset" element={<ResetPassword />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/splash" element={<Splash />} />
+            <Route path="/" element={<SplashRedirect />} />
+            <Route path="/generate" element={<Generate />} />
+            <Route path="/filter" element={<Filter />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/signup" element={<Signup />} />
+            <Route path="/auth/forgot" element={<ForgotPassword />} />
+            <Route path="/auth/reset" element={<ResetPassword />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
