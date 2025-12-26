@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
-export function SocialLoginButtons() {
+export const SocialLoginButtons = forwardRef<HTMLDivElement>((_, ref) => {
   const { signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +25,7 @@ export function SocialLoginButtons() {
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -67,4 +68,6 @@ export function SocialLoginButtons() {
       </div>
     </motion.div>
   );
-}
+});
+
+SocialLoginButtons.displayName = "SocialLoginButtons";

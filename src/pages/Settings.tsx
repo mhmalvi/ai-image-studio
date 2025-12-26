@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   ArrowLeft, 
@@ -41,9 +41,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { GradientButton } from "@/components/ui/gradient-button";
 
 type ThemeOption = "light" | "dark" | "system";
+
+// Default notification preferences
+const defaultNotifications = {
+  push: true,
+  email: false,
+  marketing: false,
+};
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -52,12 +58,16 @@ export default function Settings() {
   const { lightImpact, mediumImpact, warningNotification } = useHaptics();
   const { toast } = useToast();
   
-  // Notification preferences (local state - would connect to backend in production)
-  const [notifications, setNotifications] = useState({
-    push: true,
-    email: false,
-    marketing: false,
+  // Load notification preferences from localStorage
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("notificationPreferences");
+    return saved ? JSON.parse(saved) : defaultNotifications;
   });
+
+  // Persist notification preferences
+  useEffect(() => {
+    localStorage.setItem("notificationPreferences", JSON.stringify(notifications));
+  }, [notifications]);
 
   const themeOptions: { value: ThemeOption; label: string; icon: typeof Sun }[] = [
     { value: "light", label: "Light", icon: Sun },
@@ -70,12 +80,13 @@ export default function Settings() {
     setTheme(newTheme);
   };
 
-  const handleNotificationChange = (key: keyof typeof notifications, value: boolean) => {
+  const handleNotificationChange = (key: "push" | "email" | "marketing", value: boolean) => {
     lightImpact();
-    setNotifications(prev => ({ ...prev, [key]: value }));
+    setNotifications((prev: typeof notifications) => ({ ...prev, [key]: value }));
+    const keyLabel = key.charAt(0).toUpperCase() + key.slice(1);
     toast({
       title: "Settings updated",
-      description: `${key.charAt(0).toUpperCase() + key.slice(1)} notifications ${value ? "enabled" : "disabled"}`,
+      description: `${keyLabel} notifications ${value ? "enabled" : "disabled"}`,
     });
   };
 
@@ -313,45 +324,48 @@ export default function Settings() {
                 </div>
                 <span className="text-sm text-muted-foreground">1.0.0</span>
               </div>
-              <motion.a
-                href="#"
-                whileTap={buttonTapAnimation}
-                className="flex items-center justify-between p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+              <Link to="/terms">
+                <motion.div
+                  whileTap={buttonTapAnimation}
+                  className="flex items-center justify-between p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">Terms of Service</p>
                   </div>
-                  <p className="text-sm font-medium text-foreground">Terms of Service</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </motion.a>
-              <motion.a
-                href="#"
-                whileTap={buttonTapAnimation}
-                className="flex items-center justify-between p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </motion.div>
+              </Link>
+              <Link to="/privacy">
+                <motion.div
+                  whileTap={buttonTapAnimation}
+                  className="flex items-center justify-between p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">Privacy Policy</p>
                   </div>
-                  <p className="text-sm font-medium text-foreground">Privacy Policy</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </motion.a>
-              <motion.a
-                href="#"
-                whileTap={buttonTapAnimation}
-                className="flex items-center justify-between p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </motion.div>
+              </Link>
+              <Link to="/support">
+                <motion.div
+                  whileTap={buttonTapAnimation}
+                  className="flex items-center justify-between p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">Help & Support</p>
                   </div>
-                  <p className="text-sm font-medium text-foreground">Help & Support</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </motion.a>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </motion.div>
+              </Link>
             </GlassCard>
           </motion.div>
         </motion.div>
