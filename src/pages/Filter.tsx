@@ -20,9 +20,9 @@ const filterPresets = [
   { id: "neon-glow", label: "Neon Glow", emoji: "💜" },
   { id: "sketch", label: "Pencil Sketch", emoji: "✏️" },
   { id: "pop-art", label: "Pop Art", emoji: "🎭" },
-  { id: "pixel-art", label: "Pixel Art", emoji: "👾" },
-  { id: "dreamy", label: "Dreamy", emoji: "☁️" },
-  { id: "noir", label: "Film Noir", emoji: "🎬" },
+  { id: "portrait-enhance", label: "Portrait Pro", emoji: "👤" },
+  { id: "hdr", label: "HDR Effect", emoji: "🌟" },
+  { id: "cinematic", label: "Cinematic", emoji: "🎬" },
   { id: "fantasy", label: "Fantasy", emoji: "🧙" },
 ];
 
@@ -112,7 +112,6 @@ export default function Filter() {
       if (data?.imageUrl) {
         setFilteredImage(data.imageUrl);
         
-        // Save to database if authenticated
         if (isAuthenticated && user) {
           await saveToDatabase(data.imageUrl);
         }
@@ -204,17 +203,17 @@ export default function Filter() {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-6 pb-28">
+      <div className="flex flex-col h-full px-4 pt-4 pb-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4"
         >
           <h1 className="text-2xl font-bold text-foreground">
             AI <span className="text-gradient-accent">Filters</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Transform your photos with AI magic
           </p>
         </motion.div>
@@ -245,23 +244,23 @@ export default function Filter() {
               exit={{ opacity: 0 }}
               className="flex flex-1 flex-col items-center justify-center"
             >
-              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-destructive/10">
-                <RefreshCw className="h-10 w-10 text-destructive" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
+                <RefreshCw className="h-8 w-8 text-destructive" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-foreground">
+              <h3 className="mb-2 text-base font-semibold text-foreground">
                 {error === "rate_limit" ? "Too many requests" : 
                  error === "credits" ? "Credits exhausted" : "Something went wrong"}
               </h3>
-              <p className="mb-6 text-center text-sm text-muted-foreground">
+              <p className="mb-4 text-center text-xs text-muted-foreground">
                 {error === "rate_limit" ? "Wait a moment before trying again" :
                  error === "credits" ? "Please try again later" : "Please try again"}
               </p>
-              <div className="flex gap-3">
-                <GradientButton onClick={handleReset} variant="secondary" size="md">
+              <div className="flex gap-2">
+                <GradientButton onClick={handleReset} variant="secondary" size="sm">
                   <RotateCcw className="h-4 w-4" />
                   Start Over
                 </GradientButton>
-                <GradientButton onClick={handleRetry} variant="primary" size="md">
+                <GradientButton onClick={handleRetry} variant="primary" size="sm">
                   <RefreshCw className="h-4 w-4" />
                   Retry
                 </GradientButton>
@@ -278,42 +277,42 @@ export default function Filter() {
               className="flex flex-1 flex-col items-center justify-center"
             >
               <motion.div
-                className="mb-6 rounded-3xl border-2 border-dashed border-border/50 p-12"
+                className="mb-4 rounded-2xl border-2 border-dashed border-border/50 p-8"
                 whileTap={{ scale: 0.98 }}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="flex flex-col items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent">
-                    <ImageIcon className="h-8 w-8 text-accent-foreground" />
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-accent">
+                    <ImageIcon className="h-6 w-6 text-accent-foreground" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-foreground">
+                    <p className="text-sm font-medium text-foreground">
                       Upload a photo
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Tap to select from gallery
                     </p>
                   </div>
                 </div>
               </motion.div>
 
-              <div className="grid w-full grid-cols-2 gap-3">
+              <div className="grid w-full grid-cols-2 gap-2">
                 <GradientButton
                   onClick={() => fileInputRef.current?.click()}
                   variant="primary"
-                  size="lg"
+                  size="md"
                   className="w-full"
                 >
-                  <Upload className="h-5 w-5" />
+                  <Upload className="h-4 w-4" />
                   Gallery
                 </GradientButton>
                 <GradientButton
                   onClick={() => cameraInputRef.current?.click()}
                   variant="accent"
-                  size="lg"
+                  size="md"
                   className="w-full"
                 >
-                  <Camera className="h-5 w-5" />
+                  <Camera className="h-4 w-4" />
                   Camera
                 </GradientButton>
               </div>
@@ -326,37 +325,37 @@ export default function Filter() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-1 flex-col"
+              className="flex flex-1 flex-col overflow-hidden"
             >
               {/* Image Preview */}
-              <div className="relative mb-4 overflow-hidden rounded-2xl border border-border/50">
+              <div className="relative mb-3 overflow-hidden rounded-xl border border-border/50 flex-shrink-0">
                 <img
                   src={filteredImage || selectedImage}
                   alt="Selected image"
-                  className="aspect-square w-full object-cover"
+                  className="aspect-[4/3] w-full object-cover"
                 />
-                <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-foreground/10" />
+                <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-inset ring-foreground/10" />
               </div>
 
               {/* Filter Selection */}
-              <div className="mb-4">
-                <p className="mb-3 text-sm font-medium text-foreground">
+              <div className="mb-3 flex-shrink-0">
+                <p className="mb-2 text-xs font-medium text-foreground">
                   Choose a filter
                 </p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {filterPresets.map((filter) => (
                     <motion.button
                       key={filter.id}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedFilter(filter.id)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border-2 p-2 transition-all ${
+                      className={`flex flex-col items-center gap-0.5 rounded-lg border-2 p-1.5 transition-all ${
                         selectedFilter === filter.id
                           ? "border-accent bg-accent/10"
                           : "border-border/50 bg-card hover:border-accent/30"
                       }`}
                     >
-                      <span className="text-lg">{filter.emoji}</span>
-                      <span className="text-[10px] font-medium text-foreground line-clamp-1">
+                      <span className="text-base">{filter.emoji}</span>
+                      <span className="text-[8px] font-medium text-foreground line-clamp-1">
                         {filter.label}
                       </span>
                     </motion.button>
@@ -365,12 +364,12 @@ export default function Filter() {
               </div>
 
               {/* Intensity Slider */}
-              <div className="mb-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-medium text-foreground">
+              <div className="mb-3 flex-shrink-0">
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="text-xs font-medium text-foreground">
                     Intensity
                   </p>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {intensity[0]}%
                   </span>
                 </div>
@@ -386,14 +385,14 @@ export default function Filter() {
 
               {/* Public Toggle */}
               {isAuthenticated && (
-                <div className="mb-4 flex items-center justify-between rounded-xl border border-border/50 bg-card p-3">
+                <div className="mb-3 flex items-center justify-between rounded-lg border border-border/50 bg-card p-2 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     {isPublic ? (
-                      <Globe className="h-4 w-4 text-accent" />
+                      <Globe className="h-3.5 w-3.5 text-accent" />
                     ) : (
-                      <Lock className="h-4 w-4 text-muted-foreground" />
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
-                    <span className="text-sm font-medium text-foreground">
+                    <span className="text-xs font-medium text-foreground">
                       Share to Explore
                     </span>
                   </div>
@@ -402,13 +401,13 @@ export default function Filter() {
               )}
 
               {/* Action Buttons */}
-              <div className="mt-auto grid grid-cols-2 gap-3">
+              <div className="mt-auto grid grid-cols-2 gap-2 flex-shrink-0">
                 {!filteredImage ? (
                   <>
                     <GradientButton
                       onClick={handleReset}
                       variant="secondary"
-                      size="md"
+                      size="sm"
                       className="w-full"
                     >
                       <RotateCcw className="h-4 w-4" />
@@ -417,7 +416,7 @@ export default function Filter() {
                     <GradientButton
                       onClick={handleApplyFilter}
                       variant="accent"
-                      size="md"
+                      size="sm"
                       className="w-full"
                       disabled={!selectedFilter}
                     >
@@ -430,7 +429,7 @@ export default function Filter() {
                     <GradientButton
                       onClick={() => setIsEditing(true)}
                       variant="accent"
-                      size="md"
+                      size="sm"
                       className="w-full"
                     >
                       <Pencil className="h-4 w-4" />
@@ -438,7 +437,7 @@ export default function Filter() {
                     <GradientButton
                       onClick={handleDownload}
                       variant="primary"
-                      size="md"
+                      size="sm"
                       className="w-full"
                     >
                       <Download className="h-4 w-4" />
@@ -446,7 +445,7 @@ export default function Filter() {
                     <GradientButton
                       onClick={handleReset}
                       variant="secondary"
-                      size="md"
+                      size="sm"
                       className="w-full"
                     >
                       <RotateCcw className="h-4 w-4" />

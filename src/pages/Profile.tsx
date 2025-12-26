@@ -55,9 +55,9 @@ export default function Profile() {
   if (authLoading) {
     return (
       <PageLayout>
-        <div className="flex min-h-screen items-center justify-center">
+        <div className="flex h-full items-center justify-center">
           <motion.div
-            className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent"
+            className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
@@ -68,16 +68,16 @@ export default function Profile() {
 
   return (
     <PageLayout background="mesh">
-      <div className="flex min-h-screen flex-col px-5 pt-8">
+      <div className="flex flex-col h-full px-4 pt-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-between"
+          className="mb-5 flex items-center justify-between flex-shrink-0"
         >
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+            <p className="text-xs text-muted-foreground">
               {isAuthenticated ? "Manage your account" : "Sign in to sync your creations"}
             </p>
           </div>
@@ -89,40 +89,41 @@ export default function Profile() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
+          className="flex-shrink-0"
         >
-          <GlassCard variant="elevated" glow={isAuthenticated ? "primary" : "none"} className="mb-6">
-            <div className="flex items-center gap-5">
+          <GlassCard variant="elevated" glow={isAuthenticated ? "primary" : "none"} className="mb-4">
+            <div className="flex items-center gap-4">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="relative"
               >
-                <div className="flex h-20 w-20 items-center justify-center rounded-3xl gradient-primary shadow-lg">
-                  <User className="h-10 w-10 text-primary-foreground" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-lg">
+                  <User className="h-7 w-7 text-primary-foreground" />
                 </div>
                 {isAuthenticated && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-success border-2 border-card"
+                    className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-success border-2 border-card"
                   />
                 )}
               </motion.div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 {isAuthenticated ? (
                   <>
-                    <h3 className="text-xl font-bold text-foreground">
+                    <h3 className="text-lg font-bold text-foreground">
                       Welcome back!
                     </h3>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {user?.email}
                     </p>
                   </>
                 ) : (
                   <>
-                    <h3 className="text-xl font-bold text-foreground">
+                    <h3 className="text-lg font-bold text-foreground">
                       Guest User
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Sign in to sync your work
                     </p>
                   </>
@@ -137,7 +138,7 @@ export default function Profile() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6 grid grid-cols-3 gap-3"
+          className="mb-4 grid grid-cols-3 gap-2 flex-shrink-0"
         >
           <StatCard value={stats.generated} label="Generated" icon={Wand2} gradient="primary" />
           <StatCard value={stats.filtered} label="Filtered" icon={ImageIcon} gradient="accent" />
@@ -149,7 +150,7 @@ export default function Profile() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mb-6 space-y-3"
+          className="mb-4 space-y-2 flex-shrink-0"
         >
           {menuItems.map((item, index) => (
             <motion.div
@@ -160,18 +161,18 @@ export default function Profile() {
             >
               <GlassCard
                 variant="subtle"
-                className="flex items-center gap-4 p-4 cursor-pointer"
+                className="flex items-center gap-3 p-3 cursor-pointer"
               >
                 <div className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl",
+                  "flex h-8 w-8 items-center justify-center rounded-lg",
                   item.label === "Upgrade to Pro" ? "bg-highlight/20" : "bg-muted"
                 )}>
-                  <item.icon className={`h-5 w-5 ${item.color}`} />
+                  <item.icon className={`h-4 w-4 ${item.color}`} />
                 </div>
-                <span className="flex-1 font-semibold text-foreground">
+                <span className="flex-1 text-sm font-semibold text-foreground">
                   {item.label}
                 </span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </GlassCard>
             </motion.div>
           ))}
@@ -182,26 +183,26 @@ export default function Profile() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-auto pb-6"
+          className="mt-auto pb-4 flex-shrink-0"
         >
           {isAuthenticated ? (
             <GradientButton
               onClick={handleLogout}
               variant="secondary"
-              size="lg"
+              size="md"
               className="w-full"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
               Sign Out
             </GradientButton>
           ) : (
             <Link to="/auth/login">
               <GradientButton
                 variant="primary"
-                size="lg"
+                size="md"
                 className="w-full btn-shine"
               >
-                <LogIn className="h-5 w-5" />
+                <LogIn className="h-4 w-4" />
                 Sign In
               </GradientButton>
             </Link>
@@ -211,4 +212,3 @@ export default function Profile() {
     </PageLayout>
   );
 }
-

@@ -35,16 +35,16 @@ export default function Home() {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-5 pt-10 pb-28">
+      <div className="flex flex-col px-5 pt-8 pb-4">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-10 text-center"
+          className="mb-6 text-center"
         >
           <motion.div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 backdrop-blur-sm"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 backdrop-blur-sm"
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -52,19 +52,19 @@ export default function Home() {
             <span className="text-sm font-semibold text-primary">AI Powered</span>
           </motion.div>
 
-          <h1 className="mb-5 text-5xl font-bold tracking-tight leading-tight">
+          <h1 className="mb-3 text-4xl font-bold tracking-tight leading-tight">
             <span className="text-gradient-primary">AI Image</span>
             <br />
             <span className="text-foreground">Studio</span>
           </h1>
 
-          <p className="mx-auto max-w-sm text-base text-muted-foreground leading-relaxed">
-            Create stunning images from text or transform photos with AI-powered filters
+          <p className="mx-auto max-w-sm text-sm text-muted-foreground leading-relaxed">
+            Create stunning images from text or transform photos with AI filters
           </p>
         </motion.div>
 
         {/* Quick Actions */}
-        <div className="space-y-4 mb-8">
+        <div className="space-y-3 mb-5">
           {/* Generate Card */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -78,24 +78,24 @@ export default function Home() {
                 className="relative overflow-hidden p-0"
               >
                 <div className="absolute inset-0 gradient-primary opacity-5" />
-                <div className="relative z-10 flex items-center gap-5 p-6">
+                <div className="relative z-10 flex items-center gap-4 p-4">
                   <motion.div
                     whileHover={{ rotate: [0, -10, 10, 0] }}
                     transition={{ duration: 0.5 }}
-                    className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary shadow-lg"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary shadow-lg"
                   >
-                    <Sparkles className="h-8 w-8 text-primary-foreground" />
+                    <Sparkles className="h-6 w-6 text-primary-foreground" />
                   </motion.div>
                   <div className="flex-1">
-                    <h3 className="mb-1.5 text-xl font-bold text-foreground">
+                    <h3 className="mb-0.5 text-lg font-bold text-foreground">
                       Generate Image
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Create from text prompts
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <ArrowRight className="h-5 w-5 text-primary" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <ArrowRight className="h-4 w-4 text-primary" />
                   </div>
                 </div>
               </GlassCard>
@@ -115,24 +115,24 @@ export default function Home() {
                 className="relative overflow-hidden p-0"
               >
                 <div className="absolute inset-0 gradient-accent opacity-5" />
-                <div className="relative z-10 flex items-center gap-5 p-6">
+                <div className="relative z-10 flex items-center gap-4 p-4">
                   <motion.div
                     whileHover={{ rotate: [0, -10, 10, 0] }}
                     transition={{ duration: 0.5 }}
-                    className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent shadow-lg"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl gradient-accent shadow-lg"
                   >
-                    <ImageIcon className="h-8 w-8 text-accent-foreground" />
+                    <ImageIcon className="h-6 w-6 text-accent-foreground" />
                   </motion.div>
                   <div className="flex-1">
-                    <h3 className="mb-1.5 text-xl font-bold text-foreground">
+                    <h3 className="mb-0.5 text-lg font-bold text-foreground">
                       Apply Filters
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Transform your photos
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                    <ArrowRight className="h-5 w-5 text-accent" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
+                    <ArrowRight className="h-4 w-4 text-accent" />
                   </div>
                 </div>
               </GlassCard>
@@ -145,7 +145,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mb-8 grid grid-cols-3 gap-3"
+          className="mb-5 grid grid-cols-3 gap-2"
         >
           {features.map((feature, index) => (
             <motion.div
@@ -153,11 +153,11 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 + index * 0.1 }}
-              className="flex flex-col items-center rounded-2xl border border-border/30 bg-card/40 p-4 text-center backdrop-blur-sm"
+              className="flex flex-col items-center rounded-xl border border-border/30 bg-card/40 p-3 text-center backdrop-blur-sm"
             >
-              <feature.icon className="mb-2 h-6 w-6 text-primary" />
-              <span className="text-xs font-semibold text-foreground">{feature.label}</span>
-              <span className="text-[10px] text-muted-foreground">{feature.description}</span>
+              <feature.icon className="mb-1.5 h-5 w-5 text-primary" />
+              <span className="text-[10px] font-semibold text-foreground">{feature.label}</span>
+              <span className="text-[9px] text-muted-foreground">{feature.description}</span>
             </motion.div>
           ))}
         </motion.div>
@@ -167,26 +167,25 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mb-8"
+          className="mb-4"
         >
-          <h2 className="mb-4 text-lg font-bold text-foreground">
+          <h2 className="mb-3 text-base font-bold text-foreground">
             Popular Styles
           </h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-5 px-5">
             {styles.map((style, index) => (
               <motion.button
                 key={style.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.55 + index * 0.05 }}
-                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ delay: 0.55 + index * 0.03 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStyleClick(style.id)}
                 className="shrink-0"
               >
-                <div className={`rounded-2xl bg-gradient-to-r ${style.gradient} p-[1px]`}>
-                  <div className="rounded-2xl bg-card/90 px-5 py-3 backdrop-blur-sm">
-                    <span className="text-sm font-semibold text-foreground">
+                <div className={`rounded-xl bg-gradient-to-r ${style.gradient} p-[1px]`}>
+                  <div className="rounded-xl bg-card/90 px-4 py-2 backdrop-blur-sm">
+                    <span className="text-xs font-semibold text-foreground">
                       {style.name}
                     </span>
                   </div>
@@ -196,12 +195,12 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* CTA - Fixed position issue with pb-28 above */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="mt-auto"
+          className="mt-auto pt-2"
         >
           <Link to="/generate">
             <GradientButton variant="primary" size="lg" className="w-full btn-shine">
