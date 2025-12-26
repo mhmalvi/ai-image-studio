@@ -60,7 +60,7 @@ export default function Signup() {
       
       toast({
         title: "Account created!",
-        description: "Welcome to AI Image Studio",
+        description: "Welcome to Pixora",
       });
       navigate("/");
     } catch (error: any) {

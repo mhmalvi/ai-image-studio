@@ -43,14 +43,14 @@ export default function Terms() {
                 <p className="text-xs text-muted-foreground mb-2">Last updated: December 2024</p>
                 <h2 className="text-lg font-bold text-foreground mb-2">1. Acceptance of Terms</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  By accessing and using AI Studio, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using this app.
+                  By accessing and using Pixora, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using this app.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">2. Use License</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Permission is granted to use AI Studio for personal, non-commercial purposes. This license does not include: modifying or copying the materials, using for commercial purposes, attempting to decompile or reverse engineer any software, or removing any copyright or proprietary notations.
+                  Permission is granted to use Pixora for personal, non-commercial purposes. This license does not include: modifying or copying the materials, using for commercial purposes, attempting to decompile or reverse engineer any software, or removing any copyright or proprietary notations.
                 </p>
               </div>
 
@@ -64,7 +64,7 @@ export default function Terms() {
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">4. Prohibited Uses</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  You may not use AI Studio to generate content that is: illegal, harmful, threatening, abusive, harassing, defamatory, obscene, or that infringes on the intellectual property rights of others. We reserve the right to terminate accounts that violate these terms.
+                  You may not use Pixora to generate content that is: illegal, harmful, threatening, abusive, harassing, defamatory, obscene, or that infringes on the intellectual property rights of others. We reserve the right to terminate accounts that violate these terms.
                 </p>
               </div>
 
@@ -78,14 +78,14 @@ export default function Terms() {
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">6. Disclaimer</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  AI Studio is provided "as is" without warranties of any kind. We do not guarantee that the service will be uninterrupted, secure, or error-free. AI-generated content may not always meet your expectations.
+                  Pixora is provided "as is" without warranties of any kind. We do not guarantee that the service will be uninterrupted, secure, or error-free. AI-generated content may not always meet your expectations.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">7. Contact</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  For questions about these Terms of Service, please contact us at support@aistudio.app
+                  For questions about these Terms of Service, please contact us at support@pixora.app
                 </p>
               </div>
             </GlassCard>

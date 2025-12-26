@@ -107,7 +107,7 @@ export function useAuth() {
           provider: 'google',
           options: {
             skipBrowserRedirect: true,
-            redirectTo: 'app.lovable.19ff423b80594a7d962f6fb8f8e8b510://auth-callback',
+            redirectTo: 'com.pixora.app://auth-callback',
           },
         });
 

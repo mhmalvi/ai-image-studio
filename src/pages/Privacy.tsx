@@ -85,14 +85,14 @@ export default function Privacy() {
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">7. Children's Privacy</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  AI Studio is not intended for children under 13. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us.
+                  Pixora is not intended for children under 13. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-2">8. Contact Us</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  For privacy-related questions or to exercise your rights, contact us at privacy@aistudio.app
+                  For privacy-related questions or to exercise your rights, contact us at privacy@pixora.app
                 </p>
               </div>
             </GlassCard>

@@ -28,7 +28,7 @@ export const AuthLayout = forwardRef<HTMLDivElement, AuthLayoutProps>(
               <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
                 <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-foreground">AI Studio</span>
+              <span className="text-xl font-bold text-foreground">Pixora</span>
             </Link>
           </motion.div>
 
