@@ -1,17 +1,23 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ImageIcon, ArrowRight, Zap, Palette, Share2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
 
 const styles = [
-  { name: "Artistic", gradient: "from-purple-500 to-pink-500" },
-  { name: "Photorealistic", gradient: "from-blue-500 to-cyan-500" },
-  { name: "Anime", gradient: "from-pink-500 to-orange-400" },
-  { name: "Cyberpunk", gradient: "from-cyan-400 to-purple-600" },
-  { name: "Vintage", gradient: "from-amber-500 to-orange-600" },
-  { name: "Fantasy", gradient: "from-emerald-400 to-teal-600" },
+  { id: "artistic", name: "Artistic", gradient: "from-purple-500 to-pink-500" },
+  { id: "photorealistic", name: "Photorealistic", gradient: "from-blue-500 to-cyan-500" },
+  { id: "anime", name: "Anime", gradient: "from-pink-500 to-orange-400" },
+  { id: "cyberpunk", name: "Cyberpunk", gradient: "from-cyan-400 to-purple-600" },
+  { id: "vintage", name: "Vintage", gradient: "from-amber-500 to-orange-600" },
+  { id: "fantasy", name: "Fantasy", gradient: "from-emerald-400 to-teal-600" },
+  { id: "watercolor", name: "Watercolor", gradient: "from-sky-400 to-indigo-500" },
+  { id: "oil-painting", name: "Oil Painting", gradient: "from-rose-500 to-red-600" },
+  { id: "sketch", name: "Sketch", gradient: "from-slate-400 to-zinc-600" },
+  { id: "pop-art", name: "Pop Art", gradient: "from-yellow-400 to-pink-500" },
+  { id: "noir", name: "Film Noir", gradient: "from-gray-600 to-gray-900" },
+  { id: "dreamy", name: "Dreamy", gradient: "from-violet-400 to-purple-500" },
 ];
 
 const features = [
@@ -21,9 +27,15 @@ const features = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleStyleClick = (styleId: string) => {
+    navigate(`/generate?style=${styleId}`);
+  };
+
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-5 pt-10">
+      <div className="flex min-h-screen flex-col px-5 pt-10 pb-28">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -150,7 +162,7 @@ export default function Home() {
           ))}
         </motion.div>
 
-        {/* Style Examples */}
+        {/* Style Examples - Clickable */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -162,12 +174,14 @@ export default function Home() {
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
             {styles.map((style, index) => (
-              <motion.div
-                key={style.name}
+              <motion.button
+                key={style.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.55 + index * 0.08 }}
+                transition={{ delay: 0.55 + index * 0.05 }}
                 whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleStyleClick(style.id)}
                 className="shrink-0"
               >
                 <div className={`rounded-2xl bg-gradient-to-r ${style.gradient} p-[1px]`}>
@@ -177,17 +191,17 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA - Fixed position issue with pb-28 above */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="mt-auto pb-6"
+          className="mt-auto"
         >
           <Link to="/generate">
             <GradientButton variant="primary" size="lg" className="w-full btn-shine">

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock } from "lucide-react";
+import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GeneratingAnimation } from "@/components/ui/loading-spinner";
@@ -32,7 +32,9 @@ export default function Filter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [filteredImage, setFilteredImage] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
@@ -52,6 +54,7 @@ export default function Filter() {
       reader.onload = (e) => {
         setSelectedImage(e.target?.result as string);
         setFilteredImage(null);
+        setError(null);
       };
       reader.readAsDataURL(file);
     }
@@ -69,9 +72,10 @@ export default function Filter() {
 
     setIsProcessing(true);
     setFilteredImage(null);
+    setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("apply-filter", {
+      const { data, error: fnError } = await supabase.functions.invoke("apply-filter", {
         body: { 
           imageUrl: selectedImage, 
           filter: selectedFilter,
@@ -79,7 +83,29 @@ export default function Filter() {
         },
       });
 
-      if (error) throw error;
+      if (fnError) throw fnError;
+
+      if (data?.error) {
+        if (data.error.includes("Rate limit")) {
+          setError("rate_limit");
+          toast({
+            title: "Too many requests",
+            description: "Please wait a moment and try again",
+            variant: "destructive",
+          });
+          return;
+        }
+        if (data.error.includes("Credits")) {
+          setError("credits");
+          toast({
+            title: "Credits exhausted",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw new Error(data.error);
+      }
 
       if (data?.imageUrl) {
         setFilteredImage(data.imageUrl);
@@ -96,6 +122,7 @@ export default function Filter() {
       }
     } catch (error: any) {
       console.error("Filter error:", error);
+      setError("general");
       toast({
         title: "Processing failed",
         description: error.message || "Please try again",
@@ -121,20 +148,35 @@ export default function Filter() {
     });
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!filteredImage) return;
 
-    const link = document.createElement("a");
-    link.href = filteredImage;
-    link.download = `filtered-image-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    toast({ title: "Downloading...", description: "Preparing your image" });
 
-    toast({
-      title: "Downloaded!",
-      description: "Image saved to your device",
-    });
+    try {
+      const response = await fetch(filteredImage);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `filtered-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Downloaded!",
+        description: "Image saved to your device",
+      });
+    } catch (err) {
+      toast({
+        title: "Download failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReset = () => {
@@ -143,11 +185,17 @@ export default function Filter() {
     setFilteredImage(null);
     setIntensity([70]);
     setIsPublic(false);
+    setError(null);
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    handleApplyFilter();
   };
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-6">
+      <div className="flex min-h-screen flex-col px-4 pt-6 pb-28">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -169,9 +217,50 @@ export default function Filter() {
           accept="image/*"
           className="hidden"
         />
+        <input
+          type="file"
+          ref={cameraInputRef}
+          onChange={handleFileSelect}
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+        />
 
         <AnimatePresence mode="wait">
-          {!selectedImage && (
+          {/* Error State with Retry */}
+          {error && !isProcessing && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-1 flex-col items-center justify-center"
+            >
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-destructive/10">
+                <RefreshCw className="h-10 w-10 text-destructive" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">
+                {error === "rate_limit" ? "Too many requests" : 
+                 error === "credits" ? "Credits exhausted" : "Something went wrong"}
+              </h3>
+              <p className="mb-6 text-center text-sm text-muted-foreground">
+                {error === "rate_limit" ? "Wait a moment before trying again" :
+                 error === "credits" ? "Please try again later" : "Please try again"}
+              </p>
+              <div className="flex gap-3">
+                <GradientButton onClick={handleReset} variant="secondary" size="md">
+                  <RotateCcw className="h-4 w-4" />
+                  Start Over
+                </GradientButton>
+                <GradientButton onClick={handleRetry} variant="primary" size="md">
+                  <RefreshCw className="h-4 w-4" />
+                  Retry
+                </GradientButton>
+              </div>
+            </motion.div>
+          )}
+
+          {!selectedImage && !error && (
             <motion.div
               key="upload"
               initial={{ opacity: 0 }}
@@ -210,7 +299,7 @@ export default function Filter() {
                   Gallery
                 </GradientButton>
                 <GradientButton
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => cameraInputRef.current?.click()}
                   variant="accent"
                   size="lg"
                   className="w-full"
@@ -222,7 +311,7 @@ export default function Filter() {
             </motion.div>
           )}
 
-          {selectedImage && !isProcessing && (
+          {selectedImage && !isProcessing && !error && (
             <motion.div
               key="editor"
               initial={{ opacity: 0 }}
