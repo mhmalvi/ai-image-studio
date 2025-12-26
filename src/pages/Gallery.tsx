@@ -154,22 +154,22 @@ export default function Gallery() {
   if (authLoading || isLoading) {
     return (
       <PageLayout>
-        <div className="flex min-h-screen flex-col px-4 pt-6">
+        <div className="flex flex-col h-full px-4 pt-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-4"
           >
             <h1 className="text-2xl font-bold text-foreground">
               My <span className="text-gradient-primary">Gallery</span>
             </h1>
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-xs text-muted-foreground">Loading...</p>
           </motion.div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="aspect-square animate-pulse rounded-2xl bg-muted"
+                className="aspect-square animate-pulse rounded-xl bg-muted"
               />
             ))}
           </div>
@@ -181,11 +181,11 @@ export default function Gallery() {
   if (!isAuthenticated) {
     return (
       <PageLayout>
-        <div className="flex min-h-screen flex-col px-4 pt-6">
+        <div className="flex flex-col h-full px-4 pt-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            className="mb-4"
           >
             <h1 className="text-2xl font-bold text-foreground">
               My <span className="text-gradient-primary">Gallery</span>
@@ -196,13 +196,13 @@ export default function Gallery() {
             animate={{ opacity: 1 }}
             className="flex flex-1 flex-col items-center justify-center"
           >
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted">
-              <FolderOpen className="h-10 w-10 text-muted-foreground" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+              <FolderOpen className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground">
+            <h3 className="mb-2 text-base font-semibold text-foreground">
               Sign in to view your gallery
             </h3>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               Create an account to save and sync your creations
             </p>
           </motion.div>
@@ -213,56 +213,58 @@ export default function Gallery() {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-6">
+      <div className="flex flex-col h-full px-4 pt-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4 flex-shrink-0"
         >
           <h1 className="text-2xl font-bold text-foreground">
             My <span className="text-gradient-primary">Gallery</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Your AI creations ({images.length} images)
           </p>
         </motion.div>
 
         {images.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 pb-24">
-            {images.map((image, index) => (
-              <motion.div
-                key={image.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                className="relative cursor-pointer"
-                onClick={() => setSelectedImage(image)}
-              >
-                <ImageCard
-                  src={image.image_url}
-                  prompt={image.prompt || undefined}
-                  date={formatDate(image.created_at)}
-                  onDownload={() => handleDownload(image.image_url)}
-                  onShare={() => handleShare(image.image_url, image.prompt || "")}
-                  onDelete={() => handleDelete(image.id)}
-                />
-                {/* Public indicator */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    togglePublic(image.id, image.is_public);
-                  }}
-                  className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 backdrop-blur-sm"
+          <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
+            <div className="grid grid-cols-2 gap-2">
+              {images.map((image, index) => (
+                <motion.div
+                  key={image.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="relative cursor-pointer"
+                  onClick={() => setSelectedImage(image)}
                 >
-                  {image.is_public ? (
-                    <Globe className="h-3 w-3 text-accent" />
-                  ) : (
-                    <Lock className="h-3 w-3 text-muted-foreground" />
-                  )}
-                </button>
-              </motion.div>
-            ))}
+                  <ImageCard
+                    src={image.image_url}
+                    prompt={image.prompt || undefined}
+                    date={formatDate(image.created_at)}
+                    onDownload={() => handleDownload(image.image_url)}
+                    onShare={() => handleShare(image.image_url, image.prompt || "")}
+                    onDelete={() => handleDelete(image.id)}
+                  />
+                  {/* Public indicator */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePublic(image.id, image.is_public);
+                    }}
+                    className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-background/80 px-1.5 py-0.5 backdrop-blur-sm"
+                  >
+                    {image.is_public ? (
+                      <Globe className="h-3 w-3 text-accent" />
+                    ) : (
+                      <Lock className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </button>
+                </motion.div>
+              ))}
+            </div>
           </div>
         ) : (
           <motion.div
@@ -270,13 +272,13 @@ export default function Gallery() {
             animate={{ opacity: 1 }}
             className="flex flex-1 flex-col items-center justify-center"
           >
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted">
-              <FolderOpen className="h-10 w-10 text-muted-foreground" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+              <FolderOpen className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground">
+            <h3 className="mb-2 text-base font-semibold text-foreground">
               No images yet
             </h3>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               Start creating to build your gallery
             </p>
           </motion.div>

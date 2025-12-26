@@ -17,11 +17,11 @@ export function PageLayout({
   background = "default"
 }: PageLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <AnimatedBackground variant={background} />
       <main
         className={cn(
-          "relative z-10 safe-top safe-left safe-right pb-28",
+          "relative z-10 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide safe-top safe-left safe-right",
           className
         )}
       >

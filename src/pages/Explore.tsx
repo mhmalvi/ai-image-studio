@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Compass, Heart, TrendingUp, Clock, Flame, Download } from "lucide-react";
+import { Compass, Heart, TrendingUp, Clock, Flame } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ImageModal } from "@/components/ui/image-modal";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +66,6 @@ export default function Explore() {
       } else if (sortBy === "popular") {
         query = query.order("likes_count", { ascending: false });
       } else {
-        // trending: recent with high likes
         query = query
           .order("likes_count", { ascending: false })
           .order("created_at", { ascending: false });
@@ -171,133 +170,135 @@ export default function Explore() {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-6">
+      <div className="flex flex-col h-full px-4 pt-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4"
+          className="mb-3 flex-shrink-0"
         >
           <h1 className="text-2xl font-bold text-foreground">
             <span className="text-gradient-accent">Explore</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Discover amazing AI creations
           </p>
         </motion.div>
 
         {/* Sort Options */}
-        <div className="mb-4 flex gap-2">
+        <div className="mb-3 flex gap-2 flex-shrink-0">
           {sortOptions.map((option) => (
             <motion.button
               key={option.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSortBy(option.id)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                 sortBy === option.id
                   ? "bg-accent text-accent-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              <option.icon className="h-3.5 w-3.5" />
+              <option.icon className="h-3 w-3" />
               {option.label}
             </motion.button>
           ))}
         </div>
 
         {/* Image Grid */}
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-3"
-            >
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-square animate-pulse rounded-2xl bg-muted"
-                />
-              ))}
-            </motion.div>
-          ) : images.length > 0 ? (
-            <motion.div
-              key="images"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-2 gap-3 pb-24"
-            >
-              {images.map((image, index) => (
-                <motion.div
-                  key={image.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/50"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <img
-                    src={image.image_url}
-                    alt={image.prompt || "AI generated image"}
-                    className="aspect-square w-full object-cover"
+        <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-2 gap-2"
+              >
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square animate-pulse rounded-xl bg-muted"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  
-                  {/* Like button */}
-                  <motion.button
-                    whileTap={{ scale: 0.8 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(image.id);
-                    }}
-                    className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 backdrop-blur-sm"
+                ))}
+              </motion.div>
+            ) : images.length > 0 ? (
+              <motion.div
+                key="images"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-2 gap-2"
+              >
+                {images.map((image, index) => (
+                  <motion.div
+                    key={image.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group relative cursor-pointer overflow-hidden rounded-xl border border-border/50"
+                    onClick={() => setSelectedImage(image)}
                   >
-                    <Heart
-                      className={`h-4 w-4 transition-colors ${
-                        likedImages.has(image.id)
-                          ? "fill-destructive text-destructive"
-                          : "text-foreground"
-                      }`}
+                    <img
+                      src={image.image_url}
+                      alt={image.prompt || "AI generated image"}
+                      className="aspect-square w-full object-cover"
                     />
-                    <span className="text-xs font-medium text-foreground">
-                      {image.likes_count}
-                    </span>
-                  </motion.button>
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                    
+                    {/* Like button */}
+                    <motion.button
+                      whileTap={{ scale: 0.8 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(image.id);
+                      }}
+                      className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded-full bg-background/80 px-1.5 py-0.5 backdrop-blur-sm"
+                    >
+                      <Heart
+                        className={`h-3 w-3 transition-colors ${
+                          likedImages.has(image.id)
+                            ? "fill-destructive text-destructive"
+                            : "text-foreground"
+                        }`}
+                      />
+                      <span className="text-[10px] font-medium text-foreground">
+                        {image.likes_count}
+                      </span>
+                    </motion.button>
 
-                  {/* Prompt overlay */}
-                  {image.prompt && (
-                    <div className="absolute bottom-0 left-0 right-10 p-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <p className="line-clamp-2 text-xs text-foreground">
-                        {image.prompt}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-1 flex-col items-center justify-center"
-            >
-              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted">
-                <Compass className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-foreground">
-                No public images yet
-              </h3>
-              <p className="text-center text-sm text-muted-foreground">
-                Be the first to share your creations!
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    {/* Prompt overlay */}
+                    {image.prompt && (
+                      <div className="absolute bottom-0 left-0 right-8 p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <p className="line-clamp-2 text-[10px] text-foreground">
+                          {image.prompt}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-1 flex-col items-center justify-center py-20"
+              >
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted">
+                  <Compass className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="mb-2 text-base font-semibold text-foreground">
+                  No public images yet
+                </h3>
+                <p className="text-center text-xs text-muted-foreground">
+                  Be the first to share your creations!
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Image Preview Modal */}
         <ImageModal
