@@ -9,6 +9,7 @@ import { GeneratingAnimation } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ProBadge } from "@/components/ui/pro-badge";
+import { ShareSheet } from "@/components/share/ShareSheet";
 import { useToast } from "@/hooks/use-toast";
 import { useHaptics } from "@/hooks/useHaptics";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,7 @@ export default function Generate() {
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const { isPro, isPremium, canAccessFeature } = useSubscription();
@@ -175,27 +177,10 @@ export default function Generate() {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!generatedImage) return;
     lightImpact();
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "AI Generated Image",
-          text: prompt,
-          url: generatedImage,
-        });
-      } catch (error) {
-        console.log("Share cancelled");
-      }
-    } else {
-      await navigator.clipboard.writeText(generatedImage);
-      toast({
-        title: "Link copied!",
-        description: "Image URL copied to clipboard",
-      });
-    }
+    setIsShareOpen(true);
   };
 
   const handleReset = () => {
@@ -446,6 +431,15 @@ export default function Generate() {
           />
         )}
       </AnimatePresence>
+
+      {/* Share Sheet */}
+      <ShareSheet
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        imageUrl={generatedImage || ""}
+        title="Check out my AI creation!"
+        text={prompt}
+      />
     </PageLayout>
   );
 }

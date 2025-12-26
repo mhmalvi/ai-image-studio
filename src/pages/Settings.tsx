@@ -18,7 +18,8 @@ import {
   FileText,
   Shield,
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -29,6 +30,8 @@ import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useToast } from "@/hooks/use-toast";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { supabase } from "@/integrations/supabase/client";
 import { headerVariants, containerVariants, itemVariants, buttonTapAnimation } from "@/lib/animations";
 import {
   AlertDialog,
@@ -54,9 +57,12 @@ const defaultNotifications = {
 export default function Settings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { isAuthenticated, user } = useAuth();
-  const { lightImpact, mediumImpact, warningNotification } = useHaptics();
+  const { isAuthenticated, user, signOut } = useAuth();
+  const { lightImpact, mediumImpact, warningNotification, successNotification, errorNotification } = useHaptics();
   const { toast } = useToast();
+  const { isSupported: pushSupported, isEnabled: pushEnabled, toggleNotifications, isLoading: pushLoading } = usePushNotifications();
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Load notification preferences from localStorage
   const [notifications, setNotifications] = useState(() => {
@@ -80,8 +86,20 @@ export default function Settings() {
     setTheme(newTheme);
   };
 
-  const handleNotificationChange = (key: "push" | "email" | "marketing", value: boolean) => {
+  const handleNotificationChange = async (key: "push" | "email" | "marketing", value: boolean) => {
     lightImpact();
+    
+    // Special handling for push notifications - actually request permission
+    if (key === "push" && pushSupported) {
+      const result = await toggleNotifications();
+      setNotifications((prev: typeof notifications) => ({ ...prev, push: result }));
+      toast({
+        title: "Settings updated",
+        description: `Push notifications ${result ? "enabled" : "disabled"}`,
+      });
+      return;
+    }
+    
     setNotifications((prev: typeof notifications) => ({ ...prev, [key]: value }));
     const keyLabel = key.charAt(0).toUpperCase() + key.slice(1);
     toast({
@@ -90,21 +108,77 @@ export default function Settings() {
     });
   };
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
+    if (!user) return;
+    
+    setIsExporting(true);
     mediumImpact();
-    toast({
-      title: "Export started",
-      description: "Your data export is being prepared. You'll receive an email when it's ready.",
-    });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("export-user-data");
+      
+      if (error) throw error;
+      
+      // Create and download the JSON file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `user-data-export-${Date.now()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      successNotification();
+      toast({
+        title: "Export complete",
+        description: "Your data has been downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Export error:", error);
+      errorNotification();
+      toast({
+        title: "Export failed",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    setIsDeleting(true);
     warningNotification();
-    toast({
-      title: "Account deletion requested",
-      description: "Please contact support to complete account deletion.",
-      variant: "destructive",
-    });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      
+      if (error) throw error;
+      
+      // Sign out and redirect
+      await signOut();
+      
+      toast({
+        title: "Account deleted",
+        description: "Your account and all data have been permanently removed.",
+      });
+      
+      navigate("/", { replace: true });
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      errorNotification();
+      toast({
+        title: "Deletion failed",
+        description: error.message || "Please try again or contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -191,8 +265,9 @@ export default function Settings() {
                   </div>
                 </div>
                 <Switch
-                  checked={notifications.push}
+                  checked={pushSupported ? pushEnabled : notifications.push}
                   onCheckedChange={(value) => handleNotificationChange("push", value)}
+                  disabled={pushLoading}
                 />
               </div>
               <div className="flex items-center justify-between p-3">
@@ -255,14 +330,21 @@ export default function Settings() {
                 <motion.button
                   whileTap={buttonTapAnimation}
                   onClick={handleExportData}
-                  className="flex items-center justify-between p-3 w-full"
+                  disabled={isExporting}
+                  className="flex items-center justify-between p-3 w-full disabled:opacity-50"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                      <Download className="h-4 w-4 text-muted-foreground" />
+                      {isExporting ? (
+                        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-medium text-foreground">Export Data</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {isExporting ? "Exporting..." : "Export Data"}
+                      </p>
                       <p className="text-xs text-muted-foreground">Download all your data</p>
                     </div>
                   </div>
@@ -294,12 +376,20 @@ export default function Settings() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
+                        disabled={isDeleting}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        Delete
+                        {isDeleting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete"
+                        )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
