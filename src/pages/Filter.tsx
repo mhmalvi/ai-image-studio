@@ -409,26 +409,32 @@ export default function Filter() {
 
               {/* Filter Selection */}
               <motion.div variants={itemVariants} className="mb-3 flex-shrink-0">
-                <p className="mb-2 text-xs font-medium text-foreground">
+                <p className="mb-2 text-sm font-semibold text-foreground">
                   Choose a filter
                 </p>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-3 gap-2">
                   {filterPresets.map((filter) => (
                     <motion.button
                       key={filter.id}
                       whileTap={buttonTapAnimation}
                       onClick={() => handleFilterSelect(filter.id)}
-                      className={`relative flex flex-col items-center gap-0.5 rounded-lg border-2 p-1.5 transition-all ${
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 p-3 min-h-[72px] transition-all ${
                         selectedFilter === filter.id
-                          ? "border-accent bg-accent/10"
-                          : "border-border/50 bg-card hover:border-accent/30"
+                          ? "border-accent bg-accent/15 shadow-lg shadow-accent/20"
+                          : "border-border/50 bg-card/80 hover:border-accent/40 hover:bg-card"
                       }`}
                     >
-                      <span className="text-base">{filter.emoji}</span>
-                      <span className="text-[8px] font-medium text-foreground line-clamp-1">
-                        {filter.label}
-                      </span>
+                      <span className="text-2xl">{filter.emoji}</span>
+                      <span className="text-xs font-medium text-foreground">{filter.label}</span>
                       {filter.isPro && <ProBadge variant="corner" size="sm" />}
+                      {selectedFilter === filter.id && (
+                        <motion.div
+                          layoutId="filterIndicator"
+                          className="absolute inset-0 rounded-xl border-2 border-accent"
+                          initial={false}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      )}
                     </motion.button>
                   ))}
                 </div>

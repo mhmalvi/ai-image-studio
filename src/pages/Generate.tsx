@@ -318,24 +318,32 @@ export default function Generate() {
 
               {/* Style Presets */}
               <motion.div variants={itemVariants} className="mb-3 flex-shrink-0">
-                <p className="mb-2 text-xs font-medium text-foreground">
+                <p className="mb-2 text-sm font-semibold text-foreground">
                   Choose a style
                 </p>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-3 gap-2">
                   {stylePresets.map((style) => (
                     <motion.button
                       key={style.id}
                       whileTap={buttonTapAnimation}
                       onClick={() => handleStyleSelect(style.id)}
-                      className={`relative flex flex-col items-center gap-0.5 rounded-lg border-2 p-1.5 transition-all ${
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 p-3 min-h-[72px] transition-all ${
                         selectedStyle === style.id
-                          ? "border-primary bg-primary/10"
-                          : "border-border/50 bg-card hover:border-primary/30"
+                          ? "border-primary bg-primary/15 shadow-lg shadow-primary/20"
+                          : "border-border/50 bg-card/80 hover:border-primary/40 hover:bg-card"
                       }`}
                     >
-                      <span className="text-base">{style.emoji}</span>
-                      <span className="text-[8px] font-medium text-foreground line-clamp-1">{style.label}</span>
+                      <span className="text-2xl">{style.emoji}</span>
+                      <span className="text-xs font-medium text-foreground">{style.label}</span>
                       {style.isPro && <ProBadge variant="corner" size="sm" />}
+                      {selectedStyle === style.id && (
+                        <motion.div
+                          layoutId="styleIndicator"
+                          className="absolute inset-0 rounded-xl border-2 border-primary"
+                          initial={false}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      )}
                     </motion.button>
                   ))}
                 </div>

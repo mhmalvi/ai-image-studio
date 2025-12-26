@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { AnimatePresence } from "framer-motion";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
+import Onboarding from "./pages/Onboarding";
 import Generate from "./pages/Generate";
 import Filter from "./pages/Filter";
 import Gallery from "./pages/Gallery";
@@ -24,18 +25,24 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function SplashRedirect() {
-  const navigate = useNavigate();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
     const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
+    
     if (!hasSeenSplash) {
-      setShouldRedirect(true);
+      setRedirectTo("/splash");
+    } else if (!hasSeenOnboarding) {
+      setRedirectTo("/onboarding");
     }
   }, []);
 
-  if (shouldRedirect) {
+  if (redirectTo === "/splash") {
     return <Navigate to="/splash" replace />;
+  }
+  if (redirectTo === "/onboarding") {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <Home />;
@@ -48,6 +55,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/splash" element={<Splash />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<SplashRedirect />} />
         <Route path="/generate" element={<Generate />} />
         <Route path="/filter" element={<Filter />} />

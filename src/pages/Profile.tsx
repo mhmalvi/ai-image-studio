@@ -105,59 +105,69 @@ export default function Profile() {
           animate="animate"
         >
           <motion.div variants={itemVariants} className="flex-shrink-0">
-            <GlassCard variant="elevated" glow={isAuthenticated ? "primary" : "none"} className="mb-4">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-lg">
-                    <User className="h-7 w-7 text-primary-foreground" />
-                  </div>
-                  {isAuthenticated && (
+            {isAuthenticated ? (
+              <GlassCard variant="elevated" glow="primary" className="mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-lg">
+                      <User className="h-7 w-7 text-primary-foreground" />
+                    </div>
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-success border-2 border-card"
                     />
-                  )}
-                  {isPro && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
-                    >
-                      <Sparkles className="h-3 w-3 text-white" />
-                    </motion.div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  {isAuthenticated ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold text-foreground">
-                          Welcome back!
-                        </h3>
-                        {isPro && (
-                          <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full uppercase">
-                            {currentPlan}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user?.email}
-                      </p>
-                    </>
-                  ) : (
-                    <>
+                    {isPro && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                      >
+                        <Sparkles className="h-3 w-3 text-white" />
+                      </motion.div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
                       <h3 className="text-lg font-bold text-foreground">
-                        Guest User
+                        Welcome back!
                       </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Sign in to sync your work
-                      </p>
-                    </>
-                  )}
+                      {isPro && (
+                        <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full uppercase">
+                          {currentPlan}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            ) : (
+              <Link to="/auth/login">
+                <motion.div whileTap={buttonTapAnimation} onClick={() => lightImpact()}>
+                  <GlassCard variant="elevated" glow="accent" className="mb-4 cursor-pointer group">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-accent shadow-lg group-hover:scale-105 transition-transform">
+                          <User className="h-7 w-7 text-accent-foreground" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-foreground">
+                          Guest User
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Tap to sign in and sync your work
+                        </p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-accent group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              </Link>
+            )}
           </motion.div>
 
           {/* Stats */}
