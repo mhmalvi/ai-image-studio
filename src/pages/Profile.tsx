@@ -62,7 +62,7 @@ export default function Profile() {
       href: "/subscription",
       badge: isPro ? currentPlan.toUpperCase() : null,
     },
-    { icon: Settings, label: "Settings", color: "text-muted-foreground", href: "#" },
+    { icon: Settings, label: "Settings", color: "text-muted-foreground", href: "/settings" },
   ];
 
   if (authLoading) {

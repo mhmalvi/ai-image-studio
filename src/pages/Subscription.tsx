@@ -1,22 +1,26 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Crown, Check, ArrowLeft, Sparkles, Zap, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { ProBadge } from "@/components/ui/pro-badge";
 import { useSubscription, SUBSCRIPTION_PLANS, SubscriptionPlan } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useToast } from "@/hooks/use-toast";
+import { useInAppPurchase } from "@/hooks/useInAppPurchase";
 import { headerVariants, containerVariants, itemVariants, buttonTapAnimation } from "@/lib/animations";
 
 export default function Subscription() {
-  const { subscription, currentPlan, isLoading } = useSubscription();
+  const navigate = useNavigate();
+  const { subscription, currentPlan, isLoading, refreshSubscription } = useSubscription();
   const { isAuthenticated } = useAuth();
-  const { mediumImpact, successNotification } = useHaptics();
+  const { mediumImpact, successNotification, errorNotification } = useHaptics();
   const { toast } = useToast();
+  const { isNative, purchasePackage, restorePurchases, isPurchasing, getProductPrice } = useInAppPurchase();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -31,15 +35,55 @@ export default function Subscription() {
     mediumImpact();
     setIsProcessing(true);
 
-    // Simulate processing - in production, this would integrate with Google Play Billing
-    setTimeout(() => {
+    if (isNative) {
+      // Use native in-app purchase
+      const packageId = selectedPlan === "pro" ? "pro_monthly" : "premium_monthly";
+      const success = await purchasePackage(packageId);
+      
+      if (success) {
+        successNotification();
+        refreshSubscription();
+        toast({
+          title: "Subscription activated!",
+          description: `You are now subscribed to ${selectedPlan.toUpperCase()}`,
+        });
+      } else {
+        errorNotification();
+      }
       setIsProcessing(false);
+    } else {
+      // Web fallback - show coming soon message
+      setTimeout(() => {
+        setIsProcessing(false);
+        successNotification();
+        toast({
+          title: "Coming Soon!",
+          description: "Download our app to subscribe via Google Play",
+        });
+      }, 1500);
+    }
+  };
+
+  const handleRestorePurchases = async () => {
+    mediumImpact();
+    setIsProcessing(true);
+    
+    const success = await restorePurchases();
+    setIsProcessing(false);
+    
+    if (success) {
       successNotification();
+      refreshSubscription();
       toast({
-        title: "Coming Soon!",
-        description: "Google Play billing integration is under development. Check back soon!",
+        title: "Purchases restored!",
+        description: "Your subscription has been restored",
       });
-    }, 1500);
+    } else {
+      toast({
+        title: "No purchases found",
+        description: "No previous purchases were found to restore",
+      });
+    }
   };
 
   const getPlanIcon = (planId: SubscriptionPlan) => {
@@ -152,7 +196,7 @@ export default function Subscription() {
                   )}
 
                   <div className="flex items-start gap-3 pt-1">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    <div className={`relative flex h-10 w-10 items-center justify-center rounded-xl ${
                       plan.id === "premium" 
                         ? "bg-gradient-to-br from-amber-500 to-orange-500" 
                         : plan.id === "pro"
@@ -160,6 +204,9 @@ export default function Subscription() {
                         : "bg-muted"
                     }`}>
                       <Icon className={`h-5 w-5 ${plan.id === "free" ? "text-muted-foreground" : "text-white"}`} />
+                      {(plan.id === "pro" || plan.id === "premium") && (
+                        <ProBadge variant="corner" size="sm" className="absolute -top-1 -right-1" animate={false} />
+                      )}
                     </div>
 
                     <div className="flex-1">
@@ -237,6 +284,16 @@ export default function Subscription() {
             <GradientButton variant="secondary" size="lg" className="w-full" disabled>
               {currentPlan === "premium" ? "You have the best plan!" : "Select a plan to upgrade"}
             </GradientButton>
+          )}
+
+          {isNative && (
+            <button
+              onClick={handleRestorePurchases}
+              className="mt-2 w-full text-center text-xs text-primary underline"
+              disabled={isProcessing}
+            >
+              Restore Purchases
+            </button>
           )}
 
           <p className="mt-2 text-center text-[10px] text-muted-foreground">
