@@ -1,21 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, LogIn, LogOut, Settings, Crown, ChevronRight, ImageIcon, Wand2 } from "lucide-react";
+import { User, LogOut, Settings, Crown, ChevronRight, ImageIcon, Wand2, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Profile() {
-  const { user, isLoading: authLoading, signUp, signIn, signOut, isAuthenticated } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { user, isLoading: authLoading, signOut, isAuthenticated } = useAuth();
   const [stats, setStats] = useState({ generated: 0, filtered: 0, total: 0 });
   const { toast } = useToast();
 
@@ -40,44 +36,6 @@ export default function Profile() {
     }
   };
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) throw error;
-        toast({
-          title: "Account created!",
-          description: "Welcome to AI Image Studio",
-        });
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) throw error;
-        toast({
-          title: "Welcome back!",
-          description: "You're now signed in",
-        });
-      }
-      setShowAuth(false);
-      setEmail("");
-      setPassword("");
-    } catch (error: any) {
-      let message = error.message;
-      if (error.message?.includes("User already registered")) {
-        message = "This email is already registered. Try signing in instead.";
-      }
-      toast({
-        title: "Error",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleLogout = async () => {
     await signOut();
     setStats({ generated: 0, filtered: 0, total: 0 });
@@ -88,200 +46,167 @@ export default function Profile() {
   };
 
   const menuItems = [
-    { icon: Crown, label: "Upgrade to Pro", color: "text-highlight" },
-    { icon: Settings, label: "Settings", color: "text-muted-foreground" },
+    { icon: Crown, label: "Upgrade to Pro", color: "text-highlight", href: "#" },
+    { icon: Settings, label: "Settings", color: "text-muted-foreground", href: "#" },
   ];
 
   if (authLoading) {
     return (
       <PageLayout>
         <div className="flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <motion.div
+            className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
         </div>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout>
-      <div className="flex min-h-screen flex-col px-4 pt-6">
+    <PageLayout background="mesh">
+      <div className="flex min-h-screen flex-col px-5 pt-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-8"
         >
-          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
           <p className="text-sm text-muted-foreground">
             {isAuthenticated ? "Manage your account" : "Sign in to sync your creations"}
           </p>
         </motion.div>
 
-        {!showAuth ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-1 flex-col"
-          >
-            {/* Profile Card */}
-            <div className="mb-6 rounded-2xl border border-border/50 bg-card p-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-primary">
-                  <User className="h-8 w-8 text-primary-foreground" />
+        {/* Profile Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <GlassCard variant="elevated" glow={isAuthenticated ? "primary" : "none"} className="mb-6">
+            <div className="flex items-center gap-5">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="relative"
+              >
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl gradient-primary shadow-lg">
+                  <User className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <div className="flex-1">
-                  {isAuthenticated ? (
-                    <>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        Welcome!
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {user?.email}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        Guest User
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Sign in to sync your work
-                      </p>
-                    </>
-                  )}
-                </div>
+                {isAuthenticated && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-success border-2 border-card"
+                  />
+                )}
+              </motion.div>
+              <div className="flex-1">
+                {isAuthenticated ? (
+                  <>
+                    <h3 className="text-xl font-bold text-foreground">
+                      Welcome back!
+                    </h3>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-bold text-foreground">
+                      Guest User
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Sign in to sync your work
+                    </p>
+                  </>
+                )}
               </div>
             </div>
+          </GlassCard>
+        </motion.div>
 
-            {/* Stats */}
-            <div className="mb-6 grid grid-cols-3 gap-3">
-              {[
-                { label: "Generated", value: stats.generated, icon: Wand2 },
-                { label: "Filtered", value: stats.filtered, icon: ImageIcon },
-                { label: "Total", value: stats.total, icon: ImageIcon },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-xl border border-border/50 bg-card p-3 text-center"
-                >
-                  <p className="text-2xl font-bold text-gradient-primary">
-                    {stat.value}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6 grid grid-cols-3 gap-3"
+        >
+          <StatCard value={stats.generated} label="Generated" icon={Wand2} gradient="primary" />
+          <StatCard value={stats.filtered} label="Filtered" icon={ImageIcon} gradient="accent" />
+          <StatCard value={stats.total} label="Total" icon={ImageIcon} gradient="secondary" />
+        </motion.div>
 
-            {/* Menu Items */}
-            <div className="mb-6 space-y-2">
-              {menuItems.map((item) => (
-                <motion.button
-                  key={item.label}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex w-full items-center gap-4 rounded-xl border border-border/50 bg-card p-4 transition-colors hover:bg-muted/50"
-                >
+        {/* Menu Items */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-6 space-y-3"
+        >
+          {menuItems.map((item, index) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 + index * 0.1 }}
+            >
+              <GlassCard
+                variant="subtle"
+                className="flex items-center gap-4 p-4 cursor-pointer"
+              >
+                <div className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-xl",
+                  item.label === "Upgrade to Pro" ? "bg-highlight/20" : "bg-muted"
+                )}>
                   <item.icon className={`h-5 w-5 ${item.color}`} />
-                  <span className="flex-1 text-left font-medium text-foreground">
-                    {item.label}
-                  </span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Auth Button */}
-            <div className="mt-auto">
-              {isAuthenticated ? (
-                <GradientButton
-                  onClick={handleLogout}
-                  variant="secondary"
-                  size="lg"
-                  className="w-full"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Sign Out
-                </GradientButton>
-              ) : (
-                <GradientButton
-                  onClick={() => setShowAuth(true)}
-                  variant="primary"
-                  size="lg"
-                  className="w-full"
-                >
-                  <LogIn className="h-5 w-5" />
-                  Sign In
-                </GradientButton>
-              )}
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-1 flex-col"
-          >
-            <form onSubmit={handleAuth} className="flex flex-1 flex-col">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    className="rounded-xl border-border/50 bg-card"
-                  />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                    className="rounded-xl border-border/50 bg-card"
-                  />
-                </div>
-              </div>
+                <span className="flex-1 font-semibold text-foreground">
+                  {item.label}
+                </span>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </GlassCard>
+            </motion.div>
+          ))}
+        </motion.div>
 
-              <div className="mt-6 space-y-3">
-                <GradientButton
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="w-full"
-                  isLoading={isLoading}
-                >
-                  {isSignUp ? "Create Account" : "Sign In"}
-                </GradientButton>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {isSignUp
-                    ? "Already have an account? Sign in"
-                    : "Don't have an account? Sign up"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAuth(false)}
-                  className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        )}
+        {/* Auth Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-auto pb-6"
+        >
+          {isAuthenticated ? (
+            <GradientButton
+              onClick={handleLogout}
+              variant="secondary"
+              size="lg"
+              className="w-full"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </GradientButton>
+          ) : (
+            <Link to="/auth/login">
+              <GradientButton
+                variant="primary"
+                size="lg"
+                className="w-full btn-shine"
+              >
+                <LogIn className="h-5 w-5" />
+                Sign In
+              </GradientButton>
+            </Link>
+          )}
+        </motion.div>
       </div>
     </PageLayout>
   );
+}
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
 }
