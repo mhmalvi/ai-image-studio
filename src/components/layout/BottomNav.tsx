@@ -3,6 +3,7 @@ import { Home, Sparkles, FolderOpen, User, Compass } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useHaptics } from "@/hooks/useHaptics";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -15,11 +16,16 @@ const navItems = [
 export const BottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   (props, ref) => {
     const location = useLocation();
+    const { selectionChanged } = useHaptics();
 
     // Hide on auth and splash pages
     if (location.pathname.startsWith("/auth") || location.pathname === "/splash") {
       return null;
     }
+
+    const handleNavClick = () => {
+      selectionChanged();
+    };
 
     return (
       <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 safe-bottom" {...props}>
@@ -39,6 +45,7 @@ export const BottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
                   <NavLink
                     key={item.to}
                     to={item.to}
+                    onClick={handleNavClick}
                     className="relative flex flex-col items-center px-4 py-2"
                   >
                     {isActive && (
