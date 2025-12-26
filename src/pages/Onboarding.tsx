@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ImageIcon, Users, Crown, ArrowRight, ChevronLeft } from "lucide-react";
+import { Sparkles, ImageIcon, Users, Crown, ArrowRight, ChevronLeft, Hand } from "lucide-react";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { useHaptics } from "@/hooks/useHaptics";
 
@@ -42,11 +42,19 @@ const slides = [
 
 export default function Onboarding() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const navigate = useNavigate();
   const { lightImpact, mediumImpact } = useHaptics();
 
+  // Hide swipe hint after first interaction or after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSwipeHint(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleNext = () => {
     lightImpact();
+    setShowSwipeHint(false);
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
@@ -56,6 +64,7 @@ export default function Onboarding() {
 
   const handleSkip = () => {
     lightImpact();
+    setShowSwipeHint(false);
     handleComplete();
   };
 
@@ -67,9 +76,16 @@ export default function Onboarding() {
 
   const handleBack = () => {
     lightImpact();
+    setShowSwipeHint(false);
     if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1);
     }
+  };
+
+  const handleDotClick = (index: number) => {
+    lightImpact();
+    setShowSwipeHint(false);
+    setCurrentSlide(index);
   };
 
   const slide = slides[currentSlide];
@@ -159,21 +175,39 @@ export default function Onboarding() {
 
       {/* Footer */}
       <div className="px-8 pb-8 safe-bottom">
-        {/* Dots */}
-        <div className="flex justify-center gap-2 mb-6">
+        {/* Swipe Hint */}
+        <AnimatePresence>
+          {showSwipeHint && currentSlide === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex items-center justify-center gap-2 mb-4 text-muted-foreground"
+            >
+              <motion.div
+                animate={{ x: [0, 10, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <Hand className="h-5 w-5" />
+              </motion.div>
+              <span className="text-xs">Swipe or tap to continue</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Dots - Larger touch targets */}
+        <div className="flex justify-center gap-3 mb-6">
           {slides.map((_, index) => (
             <motion.button
               key={index}
-              onClick={() => {
-                lightImpact();
-                setCurrentSlide(index);
-              }}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              onClick={() => handleDotClick(index)}
+              className={`rounded-full transition-all duration-300 ${
                 index === currentSlide
-                  ? "w-6 bg-primary"
-                  : "w-2 bg-muted-foreground/30"
+                  ? "w-8 h-3 bg-primary"
+                  : "w-3 h-3 bg-muted-foreground/30 hover:bg-muted-foreground/50"
               }`}
               whileTap={{ scale: 0.9 }}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

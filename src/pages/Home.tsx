@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ImageIcon, ArrowRight, Zap, Palette, Share2, Star, TrendingUp } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -7,7 +7,8 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useHaptics } from "@/hooks/useHaptics";
 import { headerVariants, containerVariants, itemVariants, buttonTapAnimation } from "@/lib/animations";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const styles = [
   { id: "artistic", name: "Artistic", gradient: "from-purple-500 to-pink-500", emoji: "🎨" },
@@ -30,16 +31,46 @@ const features = [
   { icon: Share2, label: "Share", description: "Community", gradient: "from-secondary to-primary" },
 ];
 
-const stats = [
-  { value: "10K+", label: "Creations" },
-  { value: "12+", label: "AI Styles" },
-  { value: "4.9", label: "Rating", icon: Star },
-];
-
 export default function Home() {
   const navigate = useNavigate();
   const { lightImpact, mediumImpact } = useHaptics();
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Dynamic stats from database
+  const [stats, setStats] = useState([
+    { value: "10K+", label: "Creations" },
+    { value: "12+", label: "AI Styles" },
+    { value: "4.9", label: "Rating", icon: Star },
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { count } = await supabase
+          .from("generated_images")
+          .select("*", { count: "exact", head: true })
+          .eq("is_public", true);
+        
+        if (count !== null) {
+          const formattedCount = count >= 1000 
+            ? `${Math.floor(count / 1000)}K+` 
+            : count >= 100 
+              ? `${count}+`
+              : `${count}`;
+          
+          setStats([
+            { value: formattedCount, label: "Creations" },
+            { value: "12+", label: "AI Styles" },
+            { value: "4.9", label: "Rating", icon: Star },
+          ]);
+        }
+      } catch (error) {
+        console.log("Stats fetch error:", error);
+      }
+    };
+    
+    fetchStats();
+  }, []);
 
   const handleStyleClick = (styleId: string) => {
     lightImpact();
