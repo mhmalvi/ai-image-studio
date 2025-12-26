@@ -9,6 +9,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 export default function Profile() {
   const { user, isLoading: authLoading, signOut, isAuthenticated } = useAuth();
@@ -207,6 +208,3 @@ export default function Profile() {
   );
 }
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
