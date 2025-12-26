@@ -77,6 +77,13 @@ export type Database = {
             referencedRelation: "generated_images"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "image_likes_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "public_images"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_subscriptions: {
@@ -117,7 +124,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_images: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          image_url: string | null
+          is_public: boolean | null
+          likes_count: number | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

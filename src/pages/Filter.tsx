@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw, Pencil, Crown } from "lucide-react";
+import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw, Pencil, Crown, Share2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { ProBadge } from "@/components/ui/pro-badge";
+import { ShareSheet } from "@/components/share/ShareSheet";
 import { useToast } from "@/hooks/use-toast";
 import { useHaptics } from "@/hooks/useHaptics";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +44,7 @@ export default function Filter() {
   const [isPublic, setIsPublic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [showComparison, setShowComparison] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +52,12 @@ export default function Filter() {
   const { user, isAuthenticated } = useAuth();
   const { canAccessFeature } = useSubscription();
   const { lightImpact, mediumImpact, successNotification, errorNotification, warningNotification } = useHaptics();
+
+  const handleShare = () => {
+    if (!filteredImage) return;
+    lightImpact();
+    setIsShareOpen(true);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -487,12 +495,15 @@ export default function Filter() {
                     </GradientButton>
                   </>
                 ) : (
-                  <div className="col-span-2 grid grid-cols-3 gap-2">
+                  <div className="col-span-2 grid grid-cols-4 gap-2">
                     <GradientButton onClick={() => setIsEditing(true)} variant="accent" size="sm" className="w-full">
                       <Pencil className="h-4 w-4" />
                     </GradientButton>
                     <GradientButton onClick={handleDownload} variant="primary" size="sm" className="w-full">
                       <Download className="h-4 w-4" />
+                    </GradientButton>
+                    <GradientButton onClick={handleShare} variant="secondary" size="sm" className="w-full">
+                      <Share2 className="h-4 w-4" />
                     </GradientButton>
                     <GradientButton onClick={handleReset} variant="secondary" size="sm" className="w-full">
                       <RotateCcw className="h-4 w-4" />
@@ -529,6 +540,14 @@ export default function Filter() {
           />
         )}
       </AnimatePresence>
+
+      {/* Share Sheet */}
+      <ShareSheet
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        imageUrl={filteredImage || ""}
+        title="Check out my filtered image!"
+      />
     </PageLayout>
   );
 }
