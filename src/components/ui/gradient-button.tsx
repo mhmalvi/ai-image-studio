@@ -1,7 +1,8 @@
-import { forwardRef, ButtonHTMLAttributes } from "react";
+import { forwardRef } from "react";
 import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface GradientButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: "primary" | "secondary" | "accent";
@@ -11,7 +12,9 @@ interface GradientButtonProps extends Omit<HTMLMotionProps<"button">, "children"
 }
 
 export const GradientButton = forwardRef<HTMLButtonElement, GradientButtonProps>(
-  ({ className, variant = "primary", size = "md", isLoading, children, disabled, ...props }, ref) => {
+  ({ className, variant = "primary", size = "md", isLoading, children, disabled, onClick, ...props }, ref) => {
+    const { lightImpact } = useHaptics();
+
     const variants = {
       primary: "gradient-primary glow-primary",
       secondary: "gradient-secondary glow-secondary",
@@ -22,6 +25,11 @@ export const GradientButton = forwardRef<HTMLButtonElement, GradientButtonProps>
       sm: "h-9 px-4 text-sm rounded-lg",
       md: "h-12 px-6 text-base rounded-xl",
       lg: "h-14 px-8 text-lg rounded-2xl",
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      lightImpact();
+      onClick?.(e);
     };
 
     return (
@@ -38,6 +46,7 @@ export const GradientButton = forwardRef<HTMLButtonElement, GradientButtonProps>
           className
         )}
         disabled={disabled || isLoading}
+        onClick={handleClick}
         {...props}
       >
         {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}

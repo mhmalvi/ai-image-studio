@@ -9,6 +9,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -63,42 +64,48 @@ export default function Login() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue creating">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <SocialLoginButtons />
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="space-y-6"
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={itemVariants}>
+          <SocialLoginButtons />
+        </motion.div>
         
-        <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
-          <PremiumInput
-            type="email"
-            icon={Mail}
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={errors.email}
-          />
-          <PremiumInput
-            type="password"
-            icon={Lock}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={errors.password}
-          />
+        <motion.div variants={itemVariants}>
+          <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
+            <PremiumInput
+              type="email"
+              icon={Mail}
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={errors.email}
+            />
+            <PremiumInput
+              type="password"
+              icon={Lock}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={errors.password}
+            />
 
-          <div className="flex justify-end">
-            <Link
-              to="/auth/forgot"
-              className="text-sm text-muted-foreground transition-colors hover:text-primary"
-            >
-              Forgot password?
-            </Link>
-          </div>
-        </GlassCard>
+            <div className="flex justify-end">
+              <Link
+                to="/auth/forgot"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          </GlassCard>
+        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <motion.div variants={itemVariants}>
           <GradientButton
             type="submit"
             variant="primary"
@@ -112,9 +119,7 @@ export default function Login() {
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          variants={itemVariants}
           className="text-center text-sm text-muted-foreground"
         >
           Don't have an account?{" "}
@@ -125,7 +130,7 @@ export default function Login() {
             Create one
           </Link>
         </motion.p>
-      </form>
+      </motion.form>
     </AuthLayout>
   );
 }

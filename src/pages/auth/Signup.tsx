@@ -9,6 +9,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import { z } from "zod";
 
 const signupSchema = z.object({
@@ -75,19 +76,19 @@ export default function Signup() {
 
   return (
     <AuthLayout title="Create account" subtitle="Start your creative journey">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="space-y-6"
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+      >
         {/* Features list */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 grid grid-cols-2 gap-3"
-        >
+        <motion.div variants={itemVariants} className="mb-6 grid grid-cols-2 gap-3">
           {features.map((feature, index) => (
             <motion.div
               key={feature}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              variants={itemVariants}
               className="flex items-center gap-2"
             >
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20">
@@ -98,32 +99,32 @@ export default function Signup() {
           ))}
         </motion.div>
 
-        <SocialLoginButtons />
+        <motion.div variants={itemVariants}>
+          <SocialLoginButtons />
+        </motion.div>
 
-        <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
-          <PremiumInput
-            type="email"
-            icon={Mail}
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={errors.email}
-          />
-          <PremiumInput
-            type="password"
-            icon={Lock}
-            placeholder="Create a password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={errors.password}
-          />
-        </GlassCard>
+        <motion.div variants={itemVariants}>
+          <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
+            <PremiumInput
+              type="email"
+              icon={Mail}
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={errors.email}
+            />
+            <PremiumInput
+              type="password"
+              icon={Lock}
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={errors.password}
+            />
+          </GlassCard>
+        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <motion.div variants={itemVariants}>
           <GradientButton
             type="submit"
             variant="primary"
@@ -137,9 +138,7 @@ export default function Signup() {
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          variants={itemVariants}
           className="text-center text-sm text-muted-foreground"
         >
           Already have an account?{" "}
@@ -150,7 +149,7 @@ export default function Signup() {
             Sign in
           </Link>
         </motion.p>
-      </form>
+      </motion.form>
     </AuthLayout>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw, Pencil } from "lucide-react";
+import { ImageIcon, Camera, Upload, Wand2, Download, RotateCcw, Globe, Lock, RefreshCw, Pencil, Crown } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -12,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useHaptics } from "@/hooks/useHaptics";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { ImageEditor } from "@/components/editor/ImageEditor";
 import { headerVariants, containerVariants, itemVariants, buttonTapAnimation } from "@/lib/animations";
 
@@ -31,6 +33,7 @@ const filterPresets = [
 ];
 
 export default function Filter() {
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [intensity, setIntensity] = useState([70]);
@@ -44,7 +47,8 @@ export default function Filter() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
-  const { lightImpact, mediumImpact, successNotification, errorNotification } = useHaptics();
+  const { canAccessFeature } = useSubscription();
+  const { lightImpact, mediumImpact, successNotification, errorNotification, warningNotification } = useHaptics();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -218,6 +222,25 @@ export default function Filter() {
   };
 
   const handleFilterSelect = (filterId: string) => {
+    const filter = filterPresets.find(f => f.id === filterId);
+    if (filter?.isPro && !canAccessFeature('pro')) {
+      warningNotification();
+      toast({
+        title: "Pro Feature",
+        description: "Upgrade to Pro to unlock this filter",
+        action: (
+          <GradientButton 
+            variant="primary" 
+            size="sm" 
+            onClick={() => navigate('/subscription')}
+          >
+            <Crown className="h-3 w-3" />
+            Upgrade
+          </GradientButton>
+        ),
+      });
+      return;
+    }
     lightImpact();
     setSelectedFilter(filterId);
   };
