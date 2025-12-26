@@ -6,6 +6,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StatCard } from "@/components/ui/stat-card";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -72,12 +73,15 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-8 flex items-center justify-between"
         >
-          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-          <p className="text-sm text-muted-foreground">
-            {isAuthenticated ? "Manage your account" : "Sign in to sync your creations"}
-          </p>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+            <p className="text-sm text-muted-foreground">
+              {isAuthenticated ? "Manage your account" : "Sign in to sync your creations"}
+            </p>
+          </div>
+          <ThemeToggle />
         </motion.div>
 
         {/* Profile Card */}

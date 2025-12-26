@@ -6,6 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { PremiumInput } from "@/components/ui/premium-input";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { GlassCard } from "@/components/ui/glass-card";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
@@ -96,6 +97,8 @@ export default function Signup() {
             </motion.div>
           ))}
         </motion.div>
+
+        <SocialLoginButtons />
 
         <GlassCard variant="subtle" hover={false} className="space-y-5 p-6">
           <PremiumInput
