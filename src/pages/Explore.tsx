@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Compass, Heart, TrendingUp, Clock, Flame } from "lucide-react";
+import { Compass, Heart, TrendingUp, Clock, Flame, Download } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { ImageModal } from "@/components/ui/image-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
@@ -25,6 +26,7 @@ export default function Explore() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [likedImages, setLikedImages] = useState<Set<string>>(new Set());
+  const [selectedImage, setSelectedImage] = useState<ExploreImage | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -148,6 +150,19 @@ export default function Explore() {
     }
   };
 
+  const handleDownload = (src: string) => {
+    const link = document.createElement("a");
+    link.href = src;
+    link.download = `ai-image-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: "Downloaded!",
+      description: "Image saved to your device",
+    });
+  };
+
   const sortOptions = [
     { id: "popular" as SortOption, label: "Popular", icon: Flame },
     { id: "recent" as SortOption, label: "Recent", icon: Clock },
@@ -221,7 +236,8 @@ export default function Explore() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative overflow-hidden rounded-2xl border border-border/50"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/50"
+                  onClick={() => setSelectedImage(image)}
                 >
                   <img
                     src={image.image_url}
@@ -233,7 +249,10 @@ export default function Explore() {
                   {/* Like button */}
                   <motion.button
                     whileTap={{ scale: 0.8 }}
-                    onClick={() => handleLike(image.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLike(image.id);
+                    }}
                     className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 backdrop-blur-sm"
                   >
                     <Heart
@@ -279,6 +298,15 @@ export default function Explore() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Image Preview Modal */}
+        <ImageModal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          src={selectedImage?.image_url || ""}
+          prompt={selectedImage?.prompt || undefined}
+          onDownload={() => selectedImage && handleDownload(selectedImage.image_url)}
+        />
       </div>
     </PageLayout>
   );

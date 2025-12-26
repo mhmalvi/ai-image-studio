@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
 import Generate from "./pages/Generate";
@@ -13,9 +14,28 @@ import Profile from "./pages/Profile";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function SplashRedirect() {
+  const navigate = useNavigate();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  useEffect(() => {
+    const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+    if (!hasSeenSplash) {
+      setShouldRedirect(true);
+    }
+  }, []);
+
+  if (shouldRedirect) {
+    return <Navigate to="/splash" replace />;
+  }
+
+  return <Home />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,7 +45,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/splash" element={<Splash />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<SplashRedirect />} />
           <Route path="/generate" element={<Generate />} />
           <Route path="/filter" element={<Filter />} />
           <Route path="/gallery" element={<Gallery />} />
@@ -34,6 +54,7 @@ const App = () => (
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
           <Route path="/auth/forgot" element={<ForgotPassword />} />
+          <Route path="/auth/reset" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

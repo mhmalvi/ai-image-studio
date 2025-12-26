@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FolderOpen, Globe, Lock } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ImageCard } from "@/components/ui/image-card";
+import { ImageModal } from "@/components/ui/image-modal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +32,7 @@ function formatDate(dateString: string): string {
 export default function Gallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -234,7 +236,8 @@ export default function Gallery() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="relative"
+                className="relative cursor-pointer"
+                onClick={() => setSelectedImage(image)}
               >
                 <ImageCard
                   src={image.image_url}
@@ -246,7 +249,10 @@ export default function Gallery() {
                 />
                 {/* Public indicator */}
                 <button
-                  onClick={() => togglePublic(image.id, image.is_public)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePublic(image.id, image.is_public);
+                  }}
                   className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 backdrop-blur-sm"
                 >
                   {image.is_public ? (
@@ -275,6 +281,16 @@ export default function Gallery() {
             </p>
           </motion.div>
         )}
+
+        {/* Image Preview Modal */}
+        <ImageModal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          src={selectedImage?.image_url || ""}
+          prompt={selectedImage?.prompt || undefined}
+          onDownload={() => selectedImage && handleDownload(selectedImage.image_url)}
+          onShare={() => selectedImage && handleShare(selectedImage.image_url, selectedImage.prompt || "")}
+        />
       </div>
     </PageLayout>
   );
