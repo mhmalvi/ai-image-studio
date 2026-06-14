@@ -1,3 +1,6 @@
+<!-- repo-card -->
+![ai-image-studio](docs/assets/social-card.png)
+
 # Pixora - AI Image Generator & Photo Editor
 
 Create stunning AI-generated images and apply creative filters with Pixora. Transform your ideas into beautiful artwork instantly.
