@@ -1,5 +1,5 @@
 <!-- repo-card -->
-![ai-image-studio](docs/assets/social-card.png)
+![ai-image-studio](docs/assets/architecture.png)
 
 # Pixora - AI Image Generator & Photo Editor
 
